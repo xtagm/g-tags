@@ -1,21 +1,54 @@
 /**
- * G-Tags configuration and default labels
+ * X-Tags settings and default labels
  */
 /*jslint nomen: true*/
-var gtc=
+var ts=
 {
-filtered:['UA-32455356-5'],
-clic:[],
-type:['utmt','Type','dc:Doubleclick'],
-typeU:['t','Type','dc:Doubleclick'],
-headers: [['utmac','site'],['tid','site'],['utmdt','title'],['dt','title']],
-hclic:[],
-hother:[],
-hpage:[],
-rparams :[['utme', 'Extensible'],['ec', 'Category'],['ea','Action'],['el','Label'],['ev','Value']],
-pcustoms:[],
-label:
+/** Header line */
+header:
 {
+    type:
+    {
+        page:['utmt|t','','pageview:Page'],
+        cta:['utmt|t'],    
+        other:['utmt|t','','dc:Display advertising']        
+    },
+    space:[['utmac'],['tid']], // Mandatory
+    spsub:[], // Optional
+    /** Column Name: [param, contextual name] */
+    name:
+    {
+        page:[['utmdt'],['dt']],
+        cta:[['utme'],['ea', 'Event action']], 
+        other:[['utmdt'],['dt']]
+    }
+},
+/**
+ * Detail line 
+ */
+detail:
+{
+    /** Custom variables: [param, name when known site, value translation] */
+    cvar:
+    {
+        max:30,    
+        prefix:'cd',
+        val:{}
+    },
+    /** Recognized parameters: : [param, (ignored), value translation] */
+    other:[['utme'],['ec'],['ea'],['el'],['ev'],['pa']]       
+},
+
+/** Space dictionary */
+space:
+{
+    filtered:['UA-60390233-3','UA-32455356-5','UA-38676921-1','UA-38676921-2','UA-38676921-3','UA-38676921-4','UA-38676921-5','UA-38676921-6','UA-32455356-5','UA-10005-1','UA-25279800-1'],
+    known:[]
+},
+/** Parameters dictionary */
+param:
+{   
+_gid:'MD5 hash of page path',
 _r:'Redirected request',
 _s:'Hit sequence',
 _u:'Verification code',
@@ -34,8 +67,8 @@ aip:'Anonymize IP',
 av:'Application version',
 cc:'Campaign content',
 cd:'Screen name',
-cd_I_:'Custom dimension $0',
-cg_I_:'Custom group $0',
+cd_:'Custom dimension',
+cg_:'Custom group',
 ci:'Campaign ID',
 cid:'Anonymous Client ID',
 ck:'Campaign keyword',
@@ -56,13 +89,17 @@ dns:'DNS time',
 dp:'Path',
 dr:'Document referrer',
 ds:'Data source',
-dt:'Title',
+dt:'Page title',
+ea:'Action',
+ec:'Category',
+el:'Label',
+ev:'Value',
 exd:'Exception description',
 exf:'Exception fatal?',
 fl:'Flash version',
 geoid:'Geographical override',
 glcid:'Adwords ID',
-gtm:'Google Tag Manager container',
+gtm:'Property managed in GTM',
 ic:'Item code',
 il_I_nm:'Product impression list $0 name',
 il_I_pi_I_br:'List $0 Product $1 impression brand',
@@ -111,6 +148,7 @@ ta:'Transaction affiliation',
 tcc:'Transaction coupon',
 tcp:'TCP connect time',
 ti:'Transaction ID',
+tid:'Universal Analytics property',
 tr:'Transaction revenue',
 ts:'Transaction shipping',
 tt:'Transaction tax',
@@ -120,7 +158,7 @@ uip:'User IP override',
 ul:'User language',
 utc:'Timing category',
 utl:'Timing label',
-utmac:'Account',
+utmac:'Google Analytics property',
 utmcc:'Visitor and Campaign cookies',
 utmccn:'Campaign name',
 utmcct:'Campaign content',
@@ -130,7 +168,7 @@ utmcr:'Repeat campaign?',
 utmcs:'Document encoding',
 utmcsr:'Campaign source',
 utmctr:'Campaign keyword',
-utmdt:'Document title',
+utmdt:'Page title',
 utme:'Extensible',
 utmfl:'Flash version',
 utmhid:'Cache buster',

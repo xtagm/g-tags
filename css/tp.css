@@ -1,0 +1,7 @@
+.cbar {background:#2d87e2;}
+.cicon {color: #fff;}
+.cicon:hover {color:#ff6d00;}
+.tagtype{text-transform:capitalize;}
+label {color: #fff;}
+input[type=checkbox]:disabled + label {color: #c5c5c5;}
+.active{background-color:#ffa700}

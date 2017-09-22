@@ -1,0 +1,247 @@
+html { 
+	height:100%;
+}
+body {
+	font-family: Arial,sans-serif;
+	font-size: 10px;
+	padding: 0;
+	margin: 0;
+	height: 100%;
+	display: flex; 	 
+	flex-direction: column;
+}
+/* Control bar */
+.cbar {
+	background:#345268;
+	box-shadow:0px 1px 3px #CCC;	
+	opacity:1;
+	max-height:300px;
+	padding:4px 1px;
+	transition: all 0.3s ease;				
+}
+.reduced {
+	opacity:0.7;
+	max-height:4px;	
+	padding:0px;
+	cursor:pointer;
+}
+
+/* Hide controls when bar reduced */
+.cbar.reduced :nth-child(n+2) { 
+  opacity: 0; 
+  pointer-events: none;
+}
+/* Minimize led when bar reduced */
+.cbar.reduced :nth-child(1) { 
+	margin-top: 0px;
+	height: 4px;
+	border-radius: 30%;
+	opacity:0.9;
+	pointer-events: none;
+	transition: all 0.5s ease;
+}
+/* Led off */
+.led {
+    position: relative;
+    vertical-align:middle;
+    float: left;
+    margin-left: 7px;
+    margin-right: 10px;
+    width: 11px;
+    height: 11px;
+    border-radius: 50%;
+    box-shadow: #000 0 -1px 6px 1px, inset #730909 0 -1px 8px;
+    background-color: rgba(255, 255, 255, 0.25);
+    cursor:pointer;
+	transition: all 0.5s ease;      
+} 
+/* Led on */ 		
+.active {
+	box-shadow: #000 0 -1px 6px 1px, inset #6b0303 0 -1px 8px, #F00 0 0 9px 2px;
+	background-color: #F00;
+}
+/* Checkbox */
+.cspan {
+	white-space: nowrap;
+	vertical-align:middle
+}
+label {
+	margin-right: 8px;
+	color: #e6e6e6;
+}
+input[type=checkbox] {display: none}
+input[type=checkbox]:disabled + label {color: #888;}
+input[type=checkbox] + label {cursor:pointer}
+input[type=checkbox] + label:before {
+	font-family: FontAwesome;
+	display: inline-block;
+	content: "\f096";
+	width: 0.8rem;
+}
+input[type=checkbox]:checked + label:before {content: "\f046";}
+/* Icons commands */
+.cicon {
+	font-family: FontAwesome;
+	color: #e6e6e6;
+	margin-right: 8px;	
+	cursor:pointer;	
+	float:right;
+	vertical-align: middle;	
+}
+.cicon:hover {color:#42C9CF;}
+.ccopy:before {content:"\f0c5";}
+.ctrash:before {content:"\f1f8";}
+.creduce:before {content:"\f077";}
+
+#content {	
+	flex: 1; 
+	overflow-x: hidden;
+	overflow-y: auto;
+}
+/* Tag header */
+.taghead {
+	cursor:default;
+}
+.taghead:hover {
+	box-shadow: inset 0 0 100px 100px rgba(255, 255, 255, 0.35);
+}
+.tagtype {
+	cursor:cell;
+	white-space:nowrap; 
+}
+.typepage {
+	color: #275420;
+	background: #DFFFDE;
+}
+.typecta {
+	color: #00557F;
+	background: #E1EEf4;
+}
+.typeother {
+	color: #7F4614;
+	background: #F0E5CC;
+}
+.tagspace {
+	white-space:nowrap;
+}
+.tagsub {
+	white-space:nowrap;
+}
+.tagname {
+	word-break:break-word;
+}
+.tagurl {
+	color: #888;
+	word-break:break-word;
+}			
+.tagtime {
+	text-align: right;
+	margin-right: 5px;
+	white-space:nowrap;
+}
+/* Tag table */
+table {
+	border-collapse: collapse;
+	width: 100%;
+	font-size: inherit;
+}
+th {
+	border: solid #ccc 1px;
+	text-align: left;
+	font-weight: normal;
+	padding: 3px 4px;
+}
+tr.info {
+}
+tr.info.detail {
+	background: white
+}
+tr.info.advanced {
+	background: #f5f5f5;
+	font-style:italic;
+}
+td {
+	padding: 3px;
+}
+td.detail b {
+	color:inherit
+}
+td.detail {
+	padding: 3px 16px;
+	font-size: 9px;	
+}
+/* Tree viewer */
+.treechild {
+    border-style: solid;
+    border-width: 0px 0px 1px 1px;
+    border-color: #b6b6b6;
+    width: 5px;
+    height: 8px;
+    content: '';
+    display: inline-block;
+    position: relative;
+    vertical-align: middle;
+    margin-top: -8px;
+    margin-right: 2px;
+    margin-left: -8px;
+}
+.deep
+{
+    height: 22px;
+    margin-top: -34px;
+    top: 6px;
+}
+/* Tooltip container */
+.tooltip {
+    position: relative;
+    display: inline-block;
+    border-bottom: 1px dotted #ccc;
+    cursor:default;
+}
+/* Tooltip text */
+.tooltip .tooltiptext {
+    visibility: hidden;
+    position: absolute;
+    background-color: #555;
+    color: #fff;
+    text-align: center;
+    padding: 3px 4px;
+    border-radius: 4px;
+    z-index: 1;
+    opacity: 0;
+    transition: opacity .6s;
+}
+/* Tooltip mouse over */    
+.tooltip:hover .tooltiptext {
+    visibility: visible;
+    opacity: 1;
+}
+.tooltip-right {
+    top: -3px;
+    left: 100%;
+    margin-left:6px;
+}
+.tooltip-right::after {
+    content: "";
+    position: absolute;
+    top: 50%;
+    right: 100%;
+    margin-top: -4px;
+    border-width: 4px;
+    border-style: solid;
+    border-color: transparent #555 transparent transparent;
+}
+/* Bubble message */
+.msgtip {
+    visibility: hidden;
+    position: fixed;
+    background-color: #07243c;
+    color: #fff;
+    text-align: center;
+    padding: 2px 4px;
+    margin-top:1px;
+    border-radius: 3px;
+    z-index: 1;
+    opacity: 0;
+    transition: opacity .6s;
+}

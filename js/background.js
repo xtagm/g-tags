@@ -1,91 +1,97 @@
 /**
- * @title X-Tags - Background
+ * @title Tags tracker - Background
  * @author DENIS ROUSSEAU
- * @version 2.5
+ * @version 4.0
  ******************************************************************************/
 /*jslint nomen: true, plusplus: true, regexp: true*/
 /**
  * Background manager
  */
-var xtb=
+var wx=window.chrome||window.browser;
+var bm=
 {
-    browser : window.chrome||window.browser,
+    storage : wx.storage.local,
     winId:null,
     timeoutID:null,
     onChange : function()
     {
-        if (xtb.winId)
+        if (bm.winId)
         {
-            xtb.browser.windows.get(xtb.winId, null, function(w)
+            wx.windows.get(bm.winId, null, function(w)
             { 
-                if (!xtb.browser.runtime.lastError && w) 
+                if (!wx.runtime.lastError && w) 
                 {
-                    localStorage.xTags=JSON.stringify({'left':w.left,'top':w.top,'width':w.width,'height':w.height});
+                    bm.storage.set({'wTags':{'left':w.left,'top':w.top,'width':w.width,'height':w.height}});
                 }
             });
         }
     },
     startHighligth :function()
     {
-        if (!xtb.timeoutID)
+        if (!bm.timeoutID)
         {
-            xtb.browser.windows.update(xtb.winId, {"drawAttention":true});
+            wx.windows.update(bm.winId, {"drawAttention":true});
         }        
     },
     stopHighlight : function()
     {
-        xtb.timeoutID=null;
-        xtb.browser.windows.update(xtb.winId, {"drawAttention":false});
+        bm.timeoutID=null;
+        wx.windows.update(bm.winId, {"drawAttention":false});
+    },
+    onDimensionLoad : function(item)
+    {
+        var r=item.wTags||{'left':0,'top':window.screen.availHeight-200,'width':window.screen.width,'height':200};
+        wx.windows.create({url: "tags.html", type:"popup", left:(r.left||0), top:r.top, width:r.width, height:r.height}, 
+        function(w)
+        {
+            bm.winId=w.id;
+        });
     }
 };
 
 /**
  * Installation Listener (check whether new version is installed)
  */
-if (xtb.browser.runtime.onInstalled)
+if (wx.runtime.onInstalled)
 {
-	xtb.browser.runtime.onInstalled.addListener(function(details)
+	wx.runtime.onInstalled.addListener(function(details)
 	{
 		if(details.reason === "install"/* || details.reason === "update"*/ )
 		{
-			xtb.browser.tabs.create( {url: "option.html"} );
+			wx.tabs.create( {url: "option.html"} );
 		}
 	});
 }
 /**
  * Activation listener
  */
-xtb.browser.browserAction.onClicked.addListener(function() 
+wx.browserAction.onClicked.addListener(function() 
 {
-    xtb.browser.windows.getCurrent(function(win) 
+    wx.windows.getCurrent(function(win) 
     {
-        if (xtb.winId) 
+        if (bm.winId) 
         {
-            xtb.browser.windows.update(xtb.winId, {"focused":true}); 
+            wx.windows.update(bm.winId, {"focused":true}); 
         }
         else
         {
-            var r=localStorage.xTags? JSON.parse(localStorage.xTags) : {'left':0,'top':window.screen.availHeight-200,'width':window.screen.width,'height':200};
-            xtb.browser.windows.create({url: "g-tags.html", type:"popup", left:(r.left||0), top:r.top, width:r.width, height:r.height}, function(w)
-            {
-                xtb.winId=w.id;
-            });
-            xtb.browser.browserAction.setIcon({path: "img/on.png"});
+            bm.storage.get('wTags', bm.onDimensionLoad);
+            wx.browserAction.setIcon({path: "img/19.png"});
         }
     });
 });
 /**
  * Focus listener
  */
-xtb.browser.windows.onFocusChanged.addListener(function(windowId)
+wx.windows.onFocusChanged.addListener(function(windowId)
 {
-    xtb.onChange();  
+    bm.onChange();  
 });
 
 /**
  * Message listener
  */
-xtb.browser.runtime.onMessage.addListener(function(message, sender, sendResponse) 
+wx.runtime.onMessage.addListener(function(message, sender, sendResponse) 
 {
     if (message)
     {    
@@ -101,10 +107,10 @@ xtb.browser.runtime.onMessage.addListener(function(message, sender, sendResponse
             input.remove();
             break;
         case 'resize':
-            xtb.onChange();
+            bm.onChange();
             break;
         case 'newtag':
-            xtb.startHighligth();
+            bm.startHighligth();
             break ;       
         }
     }
@@ -112,12 +118,12 @@ xtb.browser.runtime.onMessage.addListener(function(message, sender, sendResponse
 /**
  * Close listener
  */
-xtb.browser.windows.onRemoved.addListener(function(windowId)
+wx.windows.onRemoved.addListener(function(windowId)
 {
-    if (windowId === xtb.winId) 
+    if (windowId === bm.winId) 
     {
-        xtb.winId = null;                
-        xtb.browser.browserAction.setIcon({path: "img/off.png"});
+        bm.winId = null;                
+        wx.browserAction.setIcon({path: "img/19bw.png"});
     }  
 });
 

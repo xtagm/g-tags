@@ -428,23 +428,23 @@ var tc=
     /**
      * Expand/Collapse row details
      */
-    toggleRow : function(row, forcedVisibility)
+    toggleRow : function(row, forced)
     {
-        var node=row.nextSibling,i=0,as=[],dvis=false, avis=false, forced=(typeof forcedVisibility==='boolean');
+        var node=row.nextSibling, vis=true, f=(typeof forced==='boolean'), 
+        toggle=function(n,vis,checked,forced)
+        {
+            vis=vis&&((n.style.display===tv.vNone)||checked)&&forced;
+            n.style.display=(vis&&n.textContent.replace(/(^\s*)/g, ""))?tv.vRow:tv.vNone;
+            return vis;
+        };            
         if (node)
         {
-            as.push(node);
-            dvis=(node.style.display===tv.vNone)||(forced && forcedVisibility);
+            vis=toggle(node,vis,tr.cDetails.checked,(!f||(forced&&tr.cDetails.checked)));
             node=node.nextSibling;
             if (node)
             {
-                as.push(node);
-                avis=(node.style.display===tv.vNone)||(forced && forcedVisibility);
+                vis=toggle(node,vis,false,(!f||(forced&&tr.cAdvanced.checked)));
             }            
-        }
-        for (i=0;i<as.length;i++)
-        {
-            as[i].style.display=(((i===0&&(tr.cDetails.checked||dvis))||(i===1&&((tr.cAdvanced.checked&&dvis)||avis)))&&(as[i].textContent.replace(/(^\s*)/g, "")))?tv.vRow:tv.vNone;
         }
     },    
     /**
@@ -625,7 +625,7 @@ var tc=
             c++;
         }            
         /* Header row: Page URL and Time columns */
-        content+=tv.nodeHeaderCell((tp.isURL()?'':tc.getUrl(rq.tabUrl)), tr.cnUrl, null,(withUrl?tv.vCell:tv.vNone));
+        content+=tv.nodeHeaderCell((tp.isURL()?tc.getUrl(rq.tabUrl):''), tr.cnUrl, null,(withUrl?tv.vCell:tv.vNone));
         content+=tv.nodeHeaderCell(tv.noBreak(date.toLocaleTimeString()), tr.cnTime);
         
         /* Node creation */

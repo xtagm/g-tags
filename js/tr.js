@@ -22,7 +22,7 @@ var trs=
         page:"Show/Hide Page tags",
         cta:"Show/Hide CTA tags",
         other:"Show/Hide other tags",
-        url:"Show/Hide URL on Page and Other tags",
+        url:"Show/Hide URL",
         details:"Show/Hide main details",
         advanced:"Show/Hide all tag parameters",    
         clear:"Clear all recorded tags (or double click anywhere with right button)",

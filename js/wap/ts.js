@@ -14,14 +14,15 @@ header:
         other:['utmt|t','','dc:Display advertising']        
     },
     space:[['utmac'],['tid']], // Mandatory
-    spsub:[], // Optional
+    spsub:[['ec']], // Optional
     /** Column Name: [param, contextual name] */
     name:
     {
         page:[['utmdt'],['dt']],
-        cta:[['utme'],['ea', 'Event action']], 
+        cta:[['utme'],['el']], 
         other:[['utmdt'],['dt']]
-    }
+    },
+    compl:[['ea']]  // Optional
 },
 /**
  * Detail line 
@@ -36,7 +37,7 @@ detail:
         val:{}
     },
     /** Recognized parameters: : [param, (ignored), value translation] */
-    other:[['utme'],['ec'],['ea'],['el'],['ev'],['pa']]       
+    other:[['utme'],['el'],['ev'],['pa']]       
 },
 
 /** Space dictionary */
@@ -90,9 +91,9 @@ dp:'Path',
 dr:'Document referrer',
 ds:'Data source',
 dt:'Page title',
-ea:'Action',
-ec:'Category',
-el:'Label',
+ea:'Event Action',
+ec:'Event Category',
+el:'Event Label',
 ev:'Value',
 exd:'Exception description',
 exf:'Exception fatal?',
@@ -122,6 +123,7 @@ ni:'Non interaction',
 pa:'Product action',
 pdt:'Page download time',
 plt:'Page load time',
+pr_I_br:'Product $0 brand',
 pr_I_ca:'Product $0 category',
 pr_I_cd_I_:'Product $0 custom dimension $1',
 pr_I_cm_I_:'Product $0 custom metric $1',

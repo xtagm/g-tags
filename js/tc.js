@@ -10,13 +10,17 @@
 var tc=
 {
     state : {checks:{}, bar:true},
-    rclick:false,
+    rclick: false,
     record : true,
     timeout : 0,
     timer : null,    
     rqdone : {},
     rqurl : [],
     lastParam:{p:'',v:''},
+    view:false,
+    chart:false,
+    user:false,
+    settings:{},
     /**
      * Parse URL parameters
      */
@@ -25,9 +29,10 @@ var tc=
         var params={};
         u.replace(new RegExp("([^?=&]+)(=([^&]*))?", "g"), function(b, a, d, c)
         {
-            if (!params[a.toLowerCase()])
+            a=a.toLowerCase();
+            if (!params[a])
             {
-                params[a.toLowerCase()] = c;
+                params[a] = c;
             }
         });
         return params;
@@ -111,6 +116,7 @@ var tc=
         var v=params[ap[0]];
         if (v)
         {
+            v=decodeURIComponent(v);
             params[ap[0]]=null;                              
         }
         return ((v==='undefined')?'':v);      
@@ -118,10 +124,10 @@ var tc=
     /**
      * Retrieve parameter's translation
      */    
-    getValueTrans: function(value, ap)
+    getValueTrans: function(value, ap, space)
     {
         var i=0, av=[], v=value;
-        if (value && ap)
+        if (value && ap && (!space || tm.spaces[space]))
         {
             for (i=0;i<ap.length;i++)
             {
@@ -150,10 +156,10 @@ var tc=
                 params[an[n]]=null;                
                 try
                 {
-                    v=decodeURIComponent(v);
-                    tc.lastParam={'p':an[n],'v':v};
+                    v=decodeURIComponent(v);                    
                 }
-                catch (err) {console.log('tc.getParamValue(..) '+v+' '+err.message);}                
+                catch (err) {console.log('tc.getParamValue(..) '+v+' '+err.message);} 
+                tc.lastParam={'p':an[n],'v':v};               
                 if (translate || tm.spaces[tm.last])
                 {
                     v=tc.getValueTrans(v,ap.slice(2));
@@ -272,16 +278,13 @@ var tc=
      */
     onClickCopy : function(e)
     {
-        var an=document.querySelectorAll('.'+tr.cnTag), i=0, j=0, s='',ah=[], att='',index=0;
+        var an=document.querySelectorAll('.'+tr.cnTag), i=0, s='', att='', index=0, c=0;
         for (i=0;i<an.length;i++)
         {
             if (an[i].style.display===tv.vRow)
             {
-                ah=an[i].querySelectorAll('th');
-                for (j=0;j<ah.length;j++)
-                {
-                    s+=(ah[j].textContent||'')+((j<ah.length-1)?'\t':'');
-                }
+                c++;
+                s+=tv.getTableRowHeads(an[i], '\t');
                 att=an[i].getAttribute('index');
                 index=att?parseInt(att,10):-1;
                 s+=((index>=0 && index<tc.rqurl.length)?('\t'+decodeURIComponent(tc.rqurl[index])):'')+'\r\n';
@@ -289,8 +292,8 @@ var tc=
         }
         if (s)
         {
-            tm.wx.runtime.sendMessage({type: 'copy', text: s});
-            alert(trs.copyDone);
+            tm.wx.runtime.sendMessage({type: 'bm_copy', text: s});
+            tc.showMsgBar(trs.copyDone.replace('#',c.toString()));
         }        
     },
     /**
@@ -321,11 +324,87 @@ var tc=
     {
         tc.toggleBar(false);       
     },
+    /**
+     * Click on tag viewer
+     */
+    onClickView:function()
+    {
+        tc.toggleView();
+    },
+    /**
+     * Click on tag+chart viewer
+     */
+    onClickChart:function()
+    {
+        if (!tc.chart && !tc.settings.email)
+        {
+            tc.showMsgBar(trs.credentials, tc.user?null:tc.toggleUser);
+        }
+        else
+        {
+            tc.toggleChart();
+        }
+    },  
+    /**
+     * Click on User
+     */
+    onClickUser:function()
+    {
+        tc.toggleUser(); 
+        if (tc.user)
+        {
+            tm.persist.get('user', function(item)
+            { 
+                var user=item.user||{};
+                tr.tEmail.value=user.email||'';
+                tr.tPwd.value=user.pwd||''; 
+                tr.sPeriod.value=user.period||tr.sPeriod.options[tr.sPeriod.selectedIndex].value;              
+            });             
+        }       
+    },  
+    /**
+     * Submit User changes
+     */
+    onClickApply:function(evt)
+    {         
+        var user={email:tr.tEmail.value,pwd:tr.tPwd.value,period:tr.sPeriod.options[tr.sPeriod.selectedIndex].value};
+        tc.settings=user; 
+        tp.checkCredentials(tc.onCredentials, tc.onCredentialsFailure, {email:user.email, pwd:user.pwd}); 
+        return false;
+    },   
+    /**
+     * Credentials validation
+     */
+    onCredentials:function(data)
+    {
+        if (data && data.UserID)
+        {
+            tm.persist.set({user:tc.settings});
+            tm.wx.runtime.sendMessage({type:'cc_userSettings','user':tc.settings});   
+            tp.setUser(tc.settings);
+            tc.showMsgBar('User settings validated');            
+            tc.toggleUser();            
+        }
+    }, 
+    onCredentialsFailure:function(status)
+    {
+        if (status===401)
+        {
+            tc.showMsgBar('These are not valid credentials');
+            tm.persist.get('user', function(item)
+            {
+                tc.settings=(typeof item.user==='object')?item.user:{};                  
+            });            
+        }
+    },     
    /**
-     * Page load event: Initialisation from storage
+     * Page load event
      */
     onLoad : function()
     {
+        /*
+         * Initialisation from storage
+         */
         tm.persist.get('statechecks', function(item)
         {
             tc.state.checks=item.statechecks||{};   
@@ -335,9 +414,20 @@ var tc=
                 {
                     tc.state.bar=item.statebar;
                 }
-                tc.onLoadState();
+                tm.persist.get('user', function(item)
+                {
+                    if (typeof item.user==='object')
+                    {
+                        tc.settings=item.user;
+                        tp.setUser(tc.settings);
+                    }                    
+                    tc.onLoadState();
+                });
             });                      
-        }); 
+        });
+        /*
+         * Right Double-click handler
+         */
         document.body.oncontextmenu=function(event) 
         {
             if (tc.rclick)    
@@ -367,18 +457,58 @@ var tc=
             tr.acbx[i].checked=tc.getCheckSetting(tr.acbx[i].id,tr.acbx[i].checked);
         }
         tc.detailsCheckChanged(tr.cDetails.checked);
+        /*
+         * Record led click 
+         */
+        tr.dRecord.addEventListener(cev, tc.onClickRecord);
+        /*
+         * Filters clicks
+         */
         tr.cPage.onchange = tc.onCheckPage;
         tr.cCTA.onchange = tc.onCheckCTA;
         tr.cOther.onchange = tc.onCheckOther;
+        /*
+         * Enhanced information clicks
+         */
         tr.cUrl.onchange = tc.onCheckUrl;
         tr.cDetails.onchange = tc.onCheckDetails;
-        tr.cAdvanced.onchange = tc.onCheckAdvanced;        
+        tr.cAdvanced.onchange = tc.onCheckAdvanced;   
+        /*
+         * General commands
+         */     
+        tr.bChevron.addEventListener(cev, tc.onClickChevron);  
+        if (tr.bBook)
+        {
+            tr.bBook.addEventListener(cev, tc.onClickBook);
+        }
         tr.bCopy.addEventListener(cev, tc.onClickCopy);       
         tr.bClear.addEventListener(cev, tc.onClickClear); 
-        tr.dRecord.addEventListener(cev, tc.onClickRecord);     
+        /*
+         * Viewers and user settings
+         */
+        if (tr.bView)
+        {
+            tr.bView.addEventListener(cev, tc.onClickView);
+        }
+        if (tr.bChart)
+        {
+            tr.bChart.addEventListener(cev, tc.onClickChart);
+        }
+        if (tr.bUser)
+        {
+            tr.bUser.addEventListener(cev, tc.onClickUser);
+        }
+        /*
+         * User settings form
+         */
+        if (tr.fUserForm && tr.bApply)
+        {                       
+            tr.fUserForm.addEventListener(cev, function(e){e.preventDefault();});
+            tr.bApply.addEventListener(cev, tc.onClickApply);
+        }       
         tr.dBar.addEventListener(cev, tc.onClickBar);  
         tr.dBar.addEventListener('dblclick', tc.onDoubleClickBar); 
-        tr.dChevron.addEventListener(cev, tc.onClickChevron); 
+
         if (!tc.state.bar)
         {
             setTimeout(function(){tc.toggleBar(false);}, 1000);
@@ -396,7 +526,7 @@ var tc=
         }
         tc.timeout = setTimeout(function() 
         {
-            tm.wx.runtime.sendMessage({type:'resize'});
+            tm.wx.runtime.sendMessage({type:'bm_resize'});
             tc.timeout = 0;
         }, 100);        
     },
@@ -448,6 +578,98 @@ var tc=
         }
     },    
     /**
+     * Enable/Disable tags viewer
+     */
+    toggleView : function(view)
+    {
+        if (tr.bView)
+        {
+            var state=(view===undefined)?!tc.view:view;        
+            tr.bView.title=state?trs.title.viewon:trs.title.view;              
+            if (state)
+            {
+                tr.bView.classList.add('cenable');            
+                if (tc.chart)
+                {
+                    tc.toggleChart();
+                }
+                setTimeout(function()
+                {
+                    tc.view=true;                  
+                    tm.wx.runtime.sendMessage({type:'bm_enableView'});                
+                },100);
+            }
+            else
+            {
+                tr.bView.classList.remove('cenable');
+                tc.view=false;              
+                if (view===undefined)
+                {
+                    tm.wx.runtime.sendMessage({type:'bm_disableView'});
+                }            
+            }
+        }
+    },
+   
+    /**
+     * Enable/Disable tags+chart viewer
+     */
+    toggleChart : function(chart, fn)
+    {
+        if (tr.bChart)
+        {
+            var state=(chart===undefined)?!tc.chart:chart;        
+            tr.bChart.title=state?trs.title.charton:trs.title.chart;              
+            if (state)
+            {
+                tr.bChart.classList.add('cenable');            
+                if (tc.view)
+                {
+                    tc.toggleView();
+                }
+                setTimeout(function()
+                {
+                    tc.chart=true;
+                    tm.wx.runtime.sendMessage({type:'bm_enableViewChart'});               
+                },100);        
+            }
+            else
+            {
+                tr.bChart.classList.remove('cenable'); 
+                tc.chart=false;  
+                if (chart===undefined)
+                {                
+                    tm.wx.runtime.sendMessage({type:'bm_disableView'});                
+                }             
+            }
+        }
+    },  
+    /**
+     * Enable/Disable tags viewer
+     */
+    toggleUser : function(user)
+    {
+        if (tr.bUser)
+        {
+            if (tc.user || (user!==undefined && !user))
+            {
+                tr.bUser.classList.remove('cenable');
+            }
+            else
+            {
+                if (tc.chart){tc.toggleChart();}
+                if (tc.view){tc.toggleView();}
+                tr.bUser.classList.add('cenable');
+            }
+            if (user===undefined)
+            {
+                tr.dUserContent.style.display=tc.user?tv.vNone:tv.vBlock;
+            }
+            tc.user=(user===undefined)?!tc.user:user;
+            tr.bUser.title=tc.user?trs.title.useron:trs.title.user;          
+        }
+    }, 
+    /**
      * Copy current cell in clipboard
      */    
     copyCell : function(node)
@@ -455,13 +677,13 @@ var tc=
         var s=node.textContent;
         if (s)
         {
-            tm.wx.runtime.sendMessage({type: 'copy', text: s});
+            tm.wx.runtime.sendMessage({type: 'bm_copy', text: s});
         }           
     },
     /**
-     * Transient message 
+     * Transient messages
      */      
-    showMessage : function(node, msg, rnode, fnEnd)
+    showMsgTag : function(node, msg, rnode, fnEnd)
     {
         tr.dMsg.innerHTML=msg;
         var rc = node.getBoundingClientRect(), rcm=tr.dMsg.getBoundingClientRect(), delay=1500, 
@@ -470,18 +692,38 @@ var tc=
         tr.dMsg.style.left = (Math.min(x1,x2)).toString() + "px";              
         tr.dMsg.style.visibility="visible";
         tr.dMsg.style.opacity="1";
-        setTimeout(tc.hideMessage, delay);
+        setTimeout(tc.hideMsgTag, delay);
         if (fnEnd)
         {
             setTimeout(fnEnd, delay);
         }
-    },
-    hideMessage : function()
+    },      
+    hideMsgTag : function()
     {
         tr.dMsg.style.opacity="0";
         tr.dMsg.style.visibility="hidden";
         tr.dMsg.innerHTML='';
     }, 
+    showMsgBar : function(msg, fnEnd)
+    {
+        tr.dHelp.innerHTML=msg;
+        var rc = tr.bUser?tr.bUser.getBoundingClientRect():tr.cAdvanced.parentNode.getBoundingClientRect(), delay=2500; 
+        tr.dHelp.style.top = "0px";
+        tr.dHelp.style.left = (rc.right+8).toString() + "px";              
+        tr.dHelp.style.visibility="visible";
+        tr.dHelp.style.opacity="1";
+        setTimeout(tc.hideMsgBar, delay);
+        if (fnEnd)
+        {
+            setTimeout(fnEnd, delay);
+        }
+    }, 
+    hideMsgBar : function()
+    {
+        tr.dHelp.style.opacity="0";
+        tr.dHelp.style.visibility="hidden";
+        tr.dHelp.innerHTML='';
+    },         
     /**
      * Double-click on tag event
      */
@@ -509,12 +751,40 @@ var tc=
             if (r && r.toString().length>0)
             {
                 tc.copyCell(event.target);
-                tc.showMessage(event.target, trs.copied, r, function(){window.getSelection().removeAllRanges();});
+                tc.showMsgTag(event.target, trs.copied, r, function(){window.getSelection().removeAllRanges();});
             }
         }
         e.preventDefault();
         e.stopPropagation();
         return false;
+    },
+    /**
+     * Click on Online guide book
+     */
+    onClickBook:function(e)
+    {
+        var b=tp.getBook();
+        if (b)
+        {
+            window.open(b);
+        }
+    },    
+    /**
+     * Click on row chart
+     */
+    onClickRowChart:function(e)
+    {
+        if (!tc.settings.email)
+        {
+            tc.showMsgBar(trs.credentials, tc.user?null:tc.toggleUser);
+        }
+        else
+        {        
+            var rc=e.target.getBoundingClientRect(), p=tv.getTableRowHeads(tv.getNodeTableRow(e.target), ';');
+            p=tc.settings.period+';'+p;
+            window.open("rchart.html?p="+encodeURIComponent(p)+'#'+tp.getUser(),"X-Tags Chart","width=350,height=200,titlebar=0,status=0,menubar=0,top="+window.screenY.toString()
+                         +",left="+(window.screenX+rc.left+rc.width+4).toString());
+        }
     },
     /**
      * Request recording
@@ -543,7 +813,7 @@ var tc=
         /* Mark recorded entry as done */
         tc.rqdone[rq.requestId].done=true;  
         
-        var node=null, content='', i=0, c=0, v='',param=null, params=tc.getUrlParser(rq.url),isBr=true, ah=[], ap=[], scontent='',cn='',
+        var node=null, content='', i=0, c=0, cs=1, v='',param=null, params=tc.getUrlParser(rq.url),isBr=true, ah=[], ap=[], scontent='',cn='',
         date=new Date(rq.timeStamp), index = tc.rqurl.push(rq.url)-1, cmin=1,
         hdr=ts.header, tmt=tm.type,
         visible=true, translate=false, ptrans=false,
@@ -558,7 +828,8 @@ var tc=
         
         /* Header row: Tag type column */   
         val=tc.getParamValue(params, (tmt.cta?hdr.type.cta:(tmt.other?hdr.type.other:hdr.type.page)), true)||(tmt.cta?trs.cta:(tmt.other?trs.other:trs.page));
-        content+=tv.nodeHeaderCell(tp.getTypeLabel(val), tr.cnType, (tc.lastParam.v?('['+tc.lastParam.p+'='+tc.lastParam.v+'] '):'')+trs.rowDoubleClic);        
+        content+=tv.nodeHeaderCellType(tp.getTypeLabel(val), tr.cnType, (tc.lastParam.v?('['+tc.lastParam.p+'='+tc.lastParam.v+'] '):'')+trs.rowDoubleClic, null, tp.isTypeChart(val));
+                
         /* Header row: space column (mandatory) */
         for (i=0,c=0;i<hdr.space.length;i++)
         {
@@ -576,8 +847,12 @@ var tc=
                 break;            
             }
         } 
+        if (c===0 && tmt.other)
+        {
+            return;
+        }
         /* Header row: Ensure that space column has been created */
-        for (i=c;i<1;i++)
+        if (c<1)
         {
             content+=tv.header;
             c++;
@@ -596,11 +871,29 @@ var tc=
         }       
         cmin+=(hdr.spsub.length?1:0);  
         /* Header row: Ensure that column has been created */
-        for (i=c;i<cmin;i++)
+        if (c<cmin)
         {
-            content+=tv.header;
+            cs++;
             c++;
         }        
+        /* Header row: Complement column, depending on tag type */
+        ah = hdr.compl||[];
+        for (i=0;i<ah.length;i++)
+        {
+            v=tc.getParamValue(params, ah[i], true);
+            if (v)
+            {
+                content+=tv.nodeHeaderCell(v, tr.cnSub, tc.getContextTitle(ah[i],trs.doubleclic));
+                c++;
+                break;
+            }
+        }     
+        cmin+=(ah.length?1:0);  
+        if (c<cmin)
+        {
+            cs++;
+            c++;
+        }                      
         /* Header row: Name column, depending on tag type */
         ah = ((tmt.cta)? hdr.name.cta:(tmt.other? hdr.name.other:hdr.name.page));
         for (i=0;i<ah.length;i++)
@@ -612,20 +905,20 @@ var tc=
                 v=v.split('&')[0];
                 if (v)
                 {
-                    content+=tv.nodeHeaderCell(v, tr.cnName, tc.getContextTitle(ah[i],trs.doubleclic));
+                    content+=tv.nodeHeaderCell(v, tr.cnName, tc.getContextTitle(ah[i],trs.doubleclic), '', cs);
+                    cs=1;
                     c++;
                     break;
                 }
             }
         }
         /* Header row: ensure that all columns have been created */
-        for (i=c;i<(cmin+1);i++)
+        if (c<(cmin+1))
         {
-            content+=tv.header;
-            c++;
+            content+=tv.nodeHeaderCellEmpty(cs);
         }            
         /* Header row: Page URL and Time columns */
-        content+=tv.nodeHeaderCell((tp.isURL()?tc.getUrl(rq.tabUrl):''), tr.cnUrl, null,(withUrl?tv.vCell:tv.vNone));
+        content+=tv.nodeHeaderCellUrl((tp.isURL()?tc.getUrl(rq.tabUrl):''), tr.cnUrl, trs.tagurl,(withUrl?tv.vCell:tv.vNone),rq.tabUrl);
         content+=tv.nodeHeaderCell(tv.noBreak(date.toLocaleTimeString()), tr.cnTime);
         
         /* Node creation */
@@ -633,6 +926,12 @@ var tc=
         node=tv.nodeRow(content, tr.cnTag+' '+cn, visible, index);
         tr.dTags.appendChild(node);
         node.addEventListener('dblclick', tc.onDoubleClickTag);
+        node=node.querySelector('.cchart');
+        if (node)
+        {
+            node.title=trs.title.rowchart;
+            node.addEventListener('click', tc.onClickRowChart);
+        }
         
         /* Details row: identified parameters */
         content=tv.detail+tv.tree1;
@@ -666,7 +965,7 @@ var tc=
                 }   
             }     
             ap=ts.detail.cvar.val[param];    
-            v=tc.getValueTrans(v, (ap?ap.slice(1):[]));
+            v=tc.getValueTrans(v, (ap?ap.slice(1):[]), tm.last);
             if (v)
             {
                 label=tp.getCvarLabel(tm.last, param, ap);
@@ -706,7 +1005,7 @@ var tc=
         tr.dContent.scrollTop=tr.dContent.scrollHeight;
         if (visible)
         {
-            tm.wx.runtime.sendMessage({type:'newtag'});
+            tm.wx.runtime.sendMessage({type:'bm_newtag'});
         }    
     },
     /**
@@ -787,7 +1086,23 @@ var tc=
                 }
             }
         }          
-    }
+    },
+    onKeyDown : function(e)
+    {
+        if (tc.view || tc.chart)
+        {
+            if (e.keyCode === 27) 
+            {
+                if (tc.view){tc.toggleView();}
+                if (tc.chart){tc.toggleChart();}
+            } 
+            else if (e.keyCode === 107)
+            {
+                tm.wx.runtime.sendMessage({type: 'tb.persist'});            
+            }
+        }
+        return false;
+    }    
 };
 /******************************************************************************
  * Listeners
@@ -801,11 +1116,47 @@ window.addEventListener("load", tc.onLoad);
  */
 window.addEventListener('resize', tc.onResize, false);
 /**
- * Requests listener
+ * Escape listener
+ */
+window.document.addEventListener("keydown", tc.onKeyDown);
+/**
+ * URL requests listener
  */
 tm.wx.webRequest.onSendHeaders.addListener(tc.onSendHeaders, {urls:tp.urls});
 tm.wx.webRequest.onHeadersReceived.addListener(tc.onHeadersReceived, {urls:tp.urls});
-
+/**
+ * Custom events listener
+ */
+tm.wx.runtime.onMessage.addListener(function(request, sender, sendResponse) 
+{
+    switch (request.type)
+    {
+    /* 
+     * Request to disable view mode
+     */
+    case 'tc_disableView':
+        tc.toggleView(false);
+        tc.toggleChart(false);
+        sendResponse({status:true});
+        break;
+    /*
+     * Request for current user settings
+     */
+    case 'tc_userSettings':
+        if (tc.settings.email)
+        {
+            sendResponse({user:tc.settings, activate:request.activate});
+        }
+        else
+        {
+            if (!tc.user)
+            {
+                toggleUser();
+            }
+        } 
+        break;        
+    }
+});
 
 
 

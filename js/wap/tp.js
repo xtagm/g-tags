@@ -29,6 +29,15 @@ var tp=
     "*://stats.g.doubleclick.net/__utm.gif*",
     "*://stats.g.doubleclick.net/collect*",
     "*://stats.g.doubleclick.net/r*"],
+
+    setUser:function(user)
+    {
+        
+    },
+    getUser:function()
+    {
+        return '';
+    },
     isRequest:function(rq)
     {
         return true;  
@@ -63,7 +72,14 @@ var tp=
     isURL : function()
     {
         return true;
-    },      
+    },   
+   /**
+     * Ask if this type must display chart icon 
+     */
+    isTypeChart : function(val)
+    {
+        return tm.type.cta;
+    },
    /**
      * Retrieve Tag Type label from identified value
      */    
@@ -125,6 +141,13 @@ var tp=
             }
         }
         return tv.noBreak(label);         
+    },
+    /**
+     * Online guide URL 
+     */
+    getBook : function()
+    {
+        return "";
     }       
 };
 

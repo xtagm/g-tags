@@ -16,6 +16,7 @@ var bm=
     loaded:null,
     charts:null,
     tabid : null,
+    clipboard:'',
     /**
      * Initialization
      */
@@ -127,12 +128,26 @@ var bm=
     },    
     enableView : function()
     {
-        wx.tabs.executeScript(bm.tabid, {code:'cc.enableView('+bm.tabid+','+bm.charts+')'}, function(result){
-        var lastErr = chrome.runtime.lastError;
-        if (lastErr) 
+        wx.tabs.executeScript(bm.tabid, {code:'cc.enableView('+bm.tabid+','+bm.charts+')'}, 
+        function(result)
         {
-            console.log('bm.enableView tab: ' + bm.tabid + ' lastError: ' + JSON.stringify(lastErr));
-        }});
+            var lastErr = chrome.runtime.lastError;
+            if (lastErr) 
+            {
+                console.log('bm.enableView tab: ' + bm.tabid + ' lastError: ' + JSON.stringify(lastErr));
+            }
+            else
+            {
+                bm.clipboard='';
+                setTimeout(function()
+                {
+                    wx.tabs.get(bm.tabid, function(tab) 
+                    {   
+                        wx.windows.update(tab.windowId, {"focused":true}); 
+                    });
+                },200);                
+            }
+        });
     },
     disableView : function()
     {
@@ -155,6 +170,11 @@ var bm=
         input.select();
         document.execCommand('Copy');
         input.remove();        
+    },
+    onAddCopy : function(text)
+    {
+        bm.clipboard+=text;
+        bm.onCopy(bm.clipboard);
     },
     onChange : function()
     {
@@ -199,16 +219,10 @@ if (wx.runtime.onInstalled)
 {
 	wx.runtime.onInstalled.addListener(function(details)
 	{
-		if(details.reason === "install")
-		{
-			wx.tabs.create( {url: "https://tagmanager.schneider-electric.com/_x-tags/index.html"} );
-		}
-		/*
-        else if(details.reason === "update" )
+        if(details.reason === "install" /*|| details.reason === "update"*/)
         {
-            wx.tabs.create( {url: "https://tagmanager.schneider-electric.com/_x-tags/index.html#What%E2%80%99s%20new%3F"} );
+            wx.tabs.create( {url: bps.url[details.reason]} );
         }
-        */		
 	});
 }
 /**
@@ -264,6 +278,9 @@ wx.runtime.onMessage.addListener(function(message, sender, sendResponse)
         case 'bm_copy':
             bm.onCopy(message.text);
             break;
+        case 'bm_addcopy':
+            bm.onAddCopy(message.text);
+            break;            
         case 'bm_resize':
             bm.onChange();
             break;
@@ -274,7 +291,7 @@ wx.runtime.onMessage.addListener(function(message, sender, sendResponse)
         case 'bm_enableView':   
             if (bm.tabid)
             {
-                bm.charts=null;
+                bm.charts=null;                
                 bm.doEnableView() ;
             }
             else

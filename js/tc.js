@@ -1,7 +1,7 @@
 /******************************************************************************
  * @title Tags Controller
  * @author DENIS ROUSSEAU
- * @version 4.5
+ * @version 4.6
  ******************************************************************************/
 /*jslint nomen: true, plusplus: true, regexp: true*/
 /**
@@ -178,6 +178,18 @@ var tc=
         var v=tc.state.checks[k];
         return (v?((v==='1')?true:false):defval);
     },
+    /**
+     * Retrieve tag content as tabulated text
+     */
+    getTagText : function(node)
+    {
+        var row=tv.getTableRowHeads(node, '\t'), att=node.getAttribute('index'), index=att?parseInt(att,10):-1;
+        row+=((index>=0 && index<tc.rqurl.length)?('\t'+decodeURIComponent(tc.rqurl[index])):'');
+        return row;    
+    },    
+    /**
+     * Recording status changed (manage record timer)
+     */
     recordChanged : function()
     {
         if (tc.record && !tc.timer)
@@ -278,22 +290,19 @@ var tc=
      */
     onClickCopy : function(e)
     {
-        var an=document.querySelectorAll('.'+tr.cnTag), i=0, s='', att='', index=0, c=0;
+        var an=document.querySelectorAll('.'+tr.cnTag), i=0, s='', c=0;
         for (i=0;i<an.length;i++)
         {
             if (an[i].style.display===tv.vRow)
             {
                 c++;
-                s+=tv.getTableRowHeads(an[i], '\t');
-                att=an[i].getAttribute('index');
-                index=att?parseInt(att,10):-1;
-                s+=((index>=0 && index<tc.rqurl.length)?('\t'+decodeURIComponent(tc.rqurl[index])):'')+'\r\n';
+                s+=tc.getTagText(an[i])+'\r\n';
             }
         }
         if (s)
         {
             tm.wx.runtime.sendMessage({type: 'bm_copy', text: s});
-            tc.showMsgBar(trs.copyDone.replace('#',c.toString()));
+            tc.showMsgBar((c===1)?trs.copyDoneOne:trs.copyDone.replace('#',c.toString()));
         }        
     },
     /**
@@ -338,7 +347,7 @@ var tc=
     {
         if (!tc.chart && !tc.settings.email)
         {
-            tc.showMsgBar(trs.credentials, tc.user?null:tc.toggleUser);
+            tc.showMsgBar(tps.credentials, tc.user?null:tc.toggleUser);
         }
         else
         {
@@ -433,7 +442,7 @@ var tc=
             if (tc.rclick)    
             {
                 tc.rclick=false;
-                tc.onClickClear();
+                tc.onDoubleClickRight(event);
             }
             else
             {
@@ -681,6 +690,17 @@ var tc=
         }           
     },
     /**
+     * Copy current tag in clipboard
+     */
+    copyTag : function(node)
+    {
+        var s=tc.getTagText(node);
+        if (s)
+        {
+            tm.wx.runtime.sendMessage({type: 'bm_copy', text: s});
+        }        
+    },
+    /**
      * Transient messages
      */      
     showMsgTag : function(node, msg, rnode, fnEnd)
@@ -727,7 +747,7 @@ var tc=
     /**
      * Double-click on tag event
      */
-    onDoubleClickTag : function(e)
+    onDoubleClickTag : function(event)
     {        
         if (!event.target.previousSibling)
         {            
@@ -757,6 +777,22 @@ var tc=
         e.preventDefault();
         e.stopPropagation();
         return false;
+    },
+    /**
+     * Right double-clic
+     */
+    onDoubleClickRight:function(e)
+    {
+        var node=e.target.parentNode;
+        while (node && ! node.classList.contains(tr.cnTag))
+        {
+            node=node.parentNode;
+        }
+        if (node)
+        {
+            tc.copyTag(node);
+            tc.showMsgBar(trs.copyDoneOne);
+        }
     },
     /**
      * Click on Online guide book
@@ -847,7 +883,7 @@ var tc=
                 break;            
             }
         } 
-        if (c===0 && tmt.other)
+        if (c===0 /*&& tmt.other*/)
         {
             return;
         }

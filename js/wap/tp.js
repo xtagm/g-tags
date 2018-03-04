@@ -5,7 +5,8 @@
 var tps=
 {
     name:'G-Tags',
-    desc:'Google Analytics tags tracker By Schneider Electric',    
+    desc:'Google Analytics tags tracker By Schneider Electric',   
+    credentials:'You need valid Google credentials to display charts', 
     /**
      * Customization
      **/
@@ -78,7 +79,7 @@ var tp=
      */
     isTypeChart : function(val)
     {
-        return tm.type.cta;
+        return false;//tm.type.cta;
     },
    /**
      * Retrieve Tag Type label from identified value

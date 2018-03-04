@@ -13,12 +13,12 @@ var trs=
     stop:"Stop recording",
     resume:"Resume recording",
     copyDone:'# tags have been copied in the clipboard,\r\nYou can paste in Excel.',
+    copyDoneOne:'1 tag has been copied in the clipboard,\r\nYou can paste in Excel.',
     expand:"Click to expand control bar",
     rowDoubleClic:"Double click to show/hide all tag parameters",
-    doubleclic:"Double click to copy value",
+    doubleclic:"Double click to copy value (left btn) / tag (right btn)",
     tagurl:"Reopen page",
     copied:'Copied',
-    credentials:'You need valid AT Internet credentials to display charts',
        
     title:{
         page:"Show/Hide Page tags",
@@ -27,7 +27,7 @@ var trs=
         url:"Show/Hide URL",
         details:"Show/Hide main details",
         advanced:"Show/Hide all tag parameters",    
-        clear:"Clear all recorded tags (or double click anywhere with right button)",
+        clear:"Clear all recorded tags",
         copy:"Copy all displayed tags",
         chevron:"Collapse control bar",
         record:"Stop recording", 

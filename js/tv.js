@@ -33,13 +33,18 @@ tv=
     },
     getTableRowHeads:function(nodeRow, sep)
     {
-        var i=0, ah=[], s='';
+        var i=0, ah=[], s='', c=0;
         if (nodeRow)
         {
             ah=nodeRow.querySelectorAll('th');
             for (i=0;i<ah.length;i++)
             {
-                s+=(ah[i].textContent.replace(/\u00a0/g,' ')||'')+((i<ah.length-1)?sep:'');
+                c=parseInt(ah[i].getAttribute('colspan')||'1',10);
+                s+=(ah[i].textContent.replace(/\u00a0/g,' ')||'');
+                if (i<ah.length-1)
+                {
+                    s+=Array(c+1).join(sep); 
+                }
             }
         }
         return s;
@@ -74,7 +79,7 @@ tv=
      */
     nodeHeaderCell : function(content, className, title, display, colspan)
     {
-        return ('<th'+(className?tv.nodeAttr('class', className):'')+(display?tv.nodeAttr('style','display:'+display+';'):'')+tv.nodeAttr('title', title)+((colspan&&colspan>1)?tv.nodeAttr('colspan',colspan.toString()+';'):'')+'>'+content+'</th>');
+        return ('<th'+(className?tv.nodeAttr('class', className):'')+(display?tv.nodeAttr('style','display:'+display+';'):'')+tv.nodeAttr('title', title)+((colspan&&colspan>1)?tv.nodeAttr('colspan',colspan.toString()):'')+'>'+content+'</th>');
     },  
     /**
      * Create an empty table header, possibly covering more than one column
@@ -99,6 +104,24 @@ tv=
         node.innerHTML = content;   
         return node; 
     },
+    /**
+     * Details and Advanced Details Rows 
+     */
+    nodeRowDetail : function(content, className, visible, firstLine)
+    {
+        return tv.nodeRow(tv.detail+(firstLine?tv.tree1:tv.tree2)+content+'</td>', className, visible) ;
+    },
+    /**
+     * Parameters in Details and Advanced Details Rows 
+     */
+    nodeParam:function(label, tip, value, first, isCVar)
+    {
+        return (first?'':'&ensp;')+tv.param+(isCVar?tv.tipVar:tv.tip)+'<b>'+label+'</b>'+tv.tipText+tip+'</span></span>:&nbsp;'+value+'</span>';
+    },
+    nodeParamCVar:function(label, tip, value, first)
+    {
+        return tv.nodeParam(label, tip, value, first, true);
+    },    
     /**
      * Return non breakable string
      */    

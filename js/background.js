@@ -11,27 +11,31 @@ var wx=window.chrome||window.browser;
 var bm=
 {
     persist : wx.storage.local,
-    winid:null,
+    winid:null,//Id Tag Window
     timeoutID:null,
     loaded:null,
     charts:null,
-    tabid : null,
+    tabid : null,//Id Current tracked tab
     clipboard:'',
     /**
      * Initialization
      */
-    init : function(tid, fn)
+    initTab:function(tab, fn)
+    {
+        if (!bm.isTabChild(tab))
+        {
+            bm.tabid=bm.isTabValid(tab)?tab.id:null ;
+            if (fn)
+            {
+                fn();
+            }
+        }
+    },    
+    tabChanged : function(tid, fn)
     {
         wx.tabs.get(tid, function(tab) 
         {   
-            if (!bm.isTabChild(tab))
-            {
-                bm.tabid=bm.isTabValid(tab)?tab.id:null ;
-                if (fn)
-                {
-                    fn();
-                }
-            }
+            bm.initTab(tab, fn);
         });        
     },
     reInit : function()
@@ -176,7 +180,15 @@ var bm=
         bm.clipboard+=text;
         bm.onCopy(bm.clipboard);
     },
-    onChange : function()
+    onTabChanged : function(tabid)
+    {
+        bm.tabChanged(tabid, function()
+        {
+            bm.disableView() ;
+            bm.resetControl();           
+        });        
+    },
+    onSizeChanged : function()
     {
         if (bm.winid)
         {
@@ -211,22 +223,11 @@ var bm=
         });
     }
 };
-
-/**
- * Installation Listener (check whether new version is installed)
+/*****************************************************************
+ * Browser action listeners
  */
-if (wx.runtime.onInstalled)
-{
-	wx.runtime.onInstalled.addListener(function(details)
-	{
-        if(details.reason === "install" /*|| details.reason === "update"*/)
-        {
-            wx.tabs.create( {url: bps.url[details.reason]} );
-        }
-	});
-}
 /**
- * Activation listener
+ * Extension activation listener
  */
 wx.browserAction.onClicked.addListener(function(tab) 
 {     
@@ -245,27 +246,23 @@ wx.browserAction.onClicked.addListener(function(tab)
         }
     });
 });
-/**
- * Close listener
- */
-wx.windows.onRemoved.addListener(function(windowId)
-{
-    if (windowId === bm.winid) 
-    {
-        bm.disableView() ;
-        bm.tabid = null;
-        bm.winid = null;                
-        wx.browserAction.setIcon({path: "img/19bw.png"});
-    }  
-});
-/**
- * Focus listener
- */
-wx.windows.onFocusChanged.addListener(function(windowId)
-{
-    bm.onChange();  
-});
 
+/*****************************************************************
+ * Runtime listeners
+ */
+/**
+ * Installation Listener (check whether new version is installed)
+ */
+if (wx.runtime.onInstalled)
+{
+	wx.runtime.onInstalled.addListener(function(details)
+	{
+        if(details.reason === "install" /*|| details.reason === "update"*/)
+        {
+            wx.tabs.create( {url: bps.url[details.reason]} );
+        }
+	});
+}
 /**
  * Message listener
  */
@@ -282,7 +279,7 @@ wx.runtime.onMessage.addListener(function(message, sender, sendResponse)
             bm.onAddCopy(message.text);
             break;            
         case 'bm_resize':
-            bm.onChange();
+            bm.onSizeChanged();
             break;
         case 'bm_newtag':
             bm.startHighligth();
@@ -316,21 +313,57 @@ wx.runtime.onMessage.addListener(function(message, sender, sendResponse)
     }
 });
 
-/*************************************
- * Catch events that disable viewing
+
+/*****************************************************************
+ * Windows listeners
+ */
+/**
+ * Close Tag window listener
+ */
+wx.windows.onRemoved.addListener(function(windowId)
+{
+    if (windowId === bm.winid) 
+    {
+        bm.disableView() ;
+        bm.tabid = null;
+        bm.winid = null;                
+        wx.browserAction.setIcon({path: "img/19bw.png"});
+    }  
+});
+/**
+ * Focus listener
+ */
+wx.windows.onFocusChanged.addListener(function(windowId)
+{
+   if (bm.winid && bm.winid!==windowId)
+   {
+        bm.onSizeChanged();       
+        wx.tabs.getSelected(windowId, function(tab)
+        {
+            if (tab.id!==bm.tabid)
+            {
+                bm.onTabChanged(tab.id);
+            }
+        }); 
+   }    
+});
+
+/*****************************************************************
+ * Tabs listeners
+ */
+/**
+ * Tab activation listener
  */
 wx.tabs.onActivated.addListener(function(activeInfo) 
 {
-   if (bm.tabid!==activeInfo.tabId && bm.winid && bm.winid!==activeInfo.windowId)
-   {
-
-        bm.init(activeInfo.tabId, function()
-        {
-            bm.disableView() ;
-            bm.resetControl();           
-        });
+    if (bm.tabid!==activeInfo.tabId && bm.winid && bm.winid!==activeInfo.windowId)
+    {
+        bm.onTabChanged(activeInfo.tabId);
     }   
 });
+/**
+ * Tab removal listener
+ */
 wx.tabs.onRemoved.addListener(function(tabId) 
 {
    if (bm.tabid === tabId)
@@ -339,17 +372,22 @@ wx.tabs.onRemoved.addListener(function(tabId)
        bm.reInit();        
    }
 });
+/**
+ * Tab load listener
+ */
 wx.tabs.onUpdated.addListener(function(tabid, changeInfo, tab) 
 {
    if (changeInfo.status==='loading')
    {
+       /* Current tab reload */
        if (bm.tabid === tabid)
        {
            bm.reInit();
        }
+       /* New tab load */
        else if (!bm.tabid)
        {
-           bm.init(tabid);
+           bm.tabChanged(tabid);
        }
     }
 });

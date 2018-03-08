@@ -747,9 +747,9 @@ var tc=
     /**
      * Double-click on tag event
      */
-    onDoubleClickTag : function(event)
+    onDoubleClickTag : function(e)
     {        
-        if (!event.target.previousSibling)
+        if (!e.target.previousSibling)
         {            
             if (window.getSelection)
             {
@@ -764,14 +764,14 @@ var tc=
             {
                 s=window.getSelection();
                 r=document.createRange();
-                r.selectNodeContents(event.target);
+                r.selectNodeContents(e.target);
                 s.removeAllRanges();
                 s.addRange(r);
             }
             if (r && r.toString().length>0)
             {
-                tc.copyCell(event.target);
-                tc.showMsgTag(event.target, trs.copied, r, function(){window.getSelection().removeAllRanges();});
+                tc.copyCell(e.target);
+                tc.showMsgTag(e.target, trs.copied, r, function(){window.getSelection().removeAllRanges();});
             }
         }
         e.preventDefault();
@@ -846,21 +846,23 @@ var tc=
      */
     addTag : function(rq)
     {       
-        /* Mark recorded entry as done */
-        tc.rqdone[rq.requestId].done=true;  
-        
-        var node=null, content='', i=0, c=0, cs=1, v='',param=null, params=tc.getUrlParser(rq.url),isBr=true, ah=[], ap=[], scontent='',cn='',
-        date=new Date(rq.timeStamp), index = tc.rqurl.push(rq.url)-1, cmin=1,
+        var node=null, content='', i=0, c=0, cs=1, v='',param=null, params=null,isBr=true, ah=[], ap=[], scontent='',cn='',
+        date=new Date(rq.timeStamp), index = 0, cmin=1,
         hdr=ts.header, tmt=tm.type,
         visible=true, translate=false, ptrans=false,
         withUrl= tr.cUrl.checked, infos= tr.cDetails.checked, advanced=false, label='', tip='', val='';
         
-        /* Compute type and visibility */
+        /* Mark request as done, store it, extract parameters, compute type and visibility */
+        tc.rqdone[rq.requestId].done=true;
+        index = tc.rqurl.push(rq.url)-1;
+        params=tc.getUrlParser(rq.url);
         tp.setParams(rq, params);
         visible=((tmt.cta && tr.cCTA.checked) || (tmt.other && tr.cOther.checked) || (!tmt.cta && !tmt.other && tr.cPage.checked));
         
         tc.detailsCheckChanged(infos);
         advanced= tr.cAdvanced.checked;    
+        
+        /* Header row **************************************************/
         
         /* Header row: Tag type column */   
         val=tc.getParamValue(params, (tmt.cta?hdr.type.cta:(tmt.other?hdr.type.other:hdr.type.page)), true)||(tmt.cta?trs.cta:(tmt.other?trs.other:trs.page));
@@ -957,21 +959,24 @@ var tc=
         content+=tv.nodeHeaderCellUrl((tp.isURL()?tc.getUrl(rq.tabUrl):''), tr.cnUrl, trs.tagurl,(withUrl?tv.vCell:tv.vNone),rq.tabUrl);
         content+=tv.nodeHeaderCell(tv.noBreak(date.toLocaleTimeString()), tr.cnTime);
         
-        /* Node creation */
+        /* Header row node creation */
         cn=(tmt.cta?tr.cnCTA:(tmt.other?tr.cnOther:tr.cnPage));
         node=tv.nodeRow(content, tr.cnTag+' '+cn, visible, index);
         tr.dTags.appendChild(node);
+        /* Double click listener */
         node.addEventListener('dblclick', tc.onDoubleClickTag);
+        /* Click on Chart icon listener */
         node=node.querySelector('.cchart');
         if (node)
         {
             node.title=trs.title.rowchart;
             node.addEventListener('click', tc.onClickRowChart);
         }
+                
+        /* Details row **************************************************/
         
         /* Details row: identified parameters */
-        content=tv.detail+tv.tree1;
-        for (i=0,c=0,scontent='';i<ts.detail.other.length;i++)
+        for (i=0,c=0,content='';i<ts.detail.other.length;i++)
         {
             val=decodeURIComponent(params[ts.detail.other[i][0]]);
             v=tc.getParamValue(params, ts.detail.other[i], true);
@@ -979,7 +984,7 @@ var tc=
             {
                 label=tp.getParamLabel(ts.detail.other[i][0]);
                 tip=((label===ts.detail.other[i][0])? tc.getParamTip(ts.detail.other[i][0]) : (ts.detail.other[i][0]+((v===val)?'':('='+val))));
-                scontent+=((c>0)?'&ensp;':'')+tv.param+tv.tip+'<b>'+label+'</b>'+tv.tipText+tip+'</span></span>:&nbsp;'+v+'</span>';
+                content+=tv.nodeParam(label, tip, v, (c===0));
                 c++;
             }
         }       
@@ -1006,15 +1011,16 @@ var tc=
             {
                 label=tp.getCvarLabel(tm.last, param, ap);
                 tip=tc.getParamTip(param) + (param+((v===val)?'':('='+val)));
-                scontent+=((c>0)?'&ensp;':'')+tv.param+tv.tipVar+'<b>'+label+'</b>'+tv.tipText+tip+'</span></span>:&nbsp;'+v+'</span>';
+                content+=tv.nodeParamCVar(label, tip, v, (c===0));
                 c++;
             }
         } 
-        node=tv.nodeRow(content+scontent+'</td>', cn+" "+tr.cnInfo+" "+tr.cnDetail, (visible&&infos&&scontent));
-        tr.dTags.appendChild(node);         
+        node=tv.nodeRowDetail(content, cn+" "+tr.cnInfo+" "+tr.cnDetail, (visible&&infos&&content), true);
+        tr.dTags.appendChild(node);     
+              
+        /* Advanced row **************************************************/     
 
         /* Advanced row: all parameters still not identified */
-        content=(scontent?(tv.detail+tv.tree2):(tv.detail+tv.tree1));
         scontent='';
         for (param in params)
         {
@@ -1028,14 +1034,16 @@ var tc=
                         v=decodeURIComponent(v);
                     }
                     catch (err2) {console.log('tc.addTag(..) Advanced:'+v+' '+err2.message);}                                                          
-                    scontent+=((c>0 && !isBr)?'&ensp;':'')+tv.param+tv.tip+'<b>'+param+'</b>'+tv.tipText+tc.getParamTip(param)+'</span></span>:&nbsp;'+v+'</span>';
+                    scontent+=tv.nodeParam(param, tc.getParamTip(param), v, (c===0||isBr));
                     isBr=false;
                     c++;
                 }                    
             }
         }    
-        node=tv.nodeRow(content+scontent+'</td>', cn + " "+tr.cnInfo+" "+tr.cnAdvanced, (visible&&advanced&&scontent));
+        node=tv.nodeRowDetail(scontent, cn + " "+tr.cnInfo+" "+tr.cnAdvanced, (visible&&advanced&&scontent), !content);
         tr.dTags.appendChild(node);   
+        
+        /* All rows are created ******************************/
           
         /* Scroll to make new tag visible and draw attention */
         tr.dContent.scrollTop=tr.dContent.scrollHeight;

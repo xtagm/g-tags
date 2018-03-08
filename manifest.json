@@ -2,7 +2,7 @@
 	"name": "G-Tags | Google Analytics tags tracker",
 	"short_name" : "G-Tags",
 	"manifest_version": 2,
-	"version": "6.0.1",
+	"version": "6.0.2",
 	"minimum_chrome_version":"44.0.2403",
 
 	"description": "Catch all Google Analytics tags. Filter by type and details. Parameters meaning. Copy/Paste in tabulated format (Excel compliant).", 

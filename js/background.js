@@ -62,6 +62,47 @@ var bm=
     /**
      * Content calls
      */
+    doEnableList : function()
+    {
+        bm.doEnableContent(bm.enableList);
+    },    
+    enableList : function()
+    {
+        wx.tabs.executeScript(bm.tabid, {code:'cc.enableList('+bm.tabid+')'}, 
+        function(result)
+        {
+            var lastErr = chrome.runtime.lastError;
+            if (lastErr) 
+            {
+                console.log('bm.enableList tab: ' + bm.tabid + ' lastError: ' + JSON.stringify(lastErr));
+            }
+            else
+            {
+                bm.clipboard='';
+                /*
+                setTimeout(function()
+                {
+                    wx.tabs.get(bm.tabid, function(tab) 
+                    {   
+                        wx.windows.update(tab.windowId, {"focused":true}); 
+                    });
+                },200);
+                */                
+            }
+        });
+    },  
+    disableList : function()
+    {
+        if (bm.tabid && bm.loaded)
+        {
+            wx.tabs.executeScript(bm.tabid, {code:'cc.disableList('+bm.tabid+')'}, function(result){
+            var lastErr = chrome.runtime.lastError;
+            if (lastErr) 
+            {
+                console.log('bm.disableList tab: ' + bm.tabid + ' lastError: ' + JSON.stringify(lastErr));
+            }});
+        }     
+    },         
     doEnableViewChart : function()
     {        
         if (bm.tabid)
@@ -84,8 +125,11 @@ var bm=
                     }
                     else
                     {
-                        bm.charts=bm.tabid;
-                        wx.tabs.executeScript(bm.tabid, {file:'js/lib/Chart.min.js'}, bm.doEnableView);                                    
+                        bm.charts=bm.tabid;                            
+                        wx.tabs.executeScript(bm.tabid, {file: "js/lib/Chart.min.js" },function() 
+                        {
+                            wx.tabs.executeScript(bm.tabid, {file:'js/ccomp/ch.js'}, bm.doEnableView);
+                        });
                     }                  
                 });
             }
@@ -94,13 +138,13 @@ var bm=
     /**
      * Content calls
      */
-    doEnableView : function()
+    doEnableContent : function(fn)
     {        
         if (bm.tabid)
         {
             if (bm.loaded===bm.tabid)         
             {
-                bm.enableView();
+                fn();
             }
             else
             {
@@ -112,23 +156,24 @@ var bm=
                     }               
                     if (bm.loaded===bm.tabid)
                     {
-                        bm.enableView() ;
+                        fn() ;
                     }                
                     else
                     {
                         bm.loaded=bm.tabid;
-                        wx.tabs.insertCSS(bm.tabid, {file:'css/content.css'}); 
-                        wx.tabs.executeScript(bm.tabid, {file: "js/ccomp/ch.js" },function() 
+                        wx.tabs.insertCSS(bm.tabid, {file:'css/content.css'});
+                        wx.tabs.executeScript(bm.tabid, {file:'js/wap/ccomp/cp.js'},function()
                         {
-                            wx.tabs.executeScript(bm.tabid, {file:'js/wap/ccomp/cp.js'},function()
-                            {
-                                wx.tabs.executeScript(bm.tabid, {file:'js/ccomp/cc.js'}, bm.enableView);
-                            });
-                        });                                                        
+                            wx.tabs.executeScript(bm.tabid, {file:'js/ccomp/cc.js'}, fn);
+                        });
                     }  
                 });
             }
         }
+    },     
+    doEnableView : function()
+    {        
+        bm.doEnableContent(bm.enableView);
     },    
     enableView : function()
     {
@@ -241,7 +286,12 @@ wx.browserAction.onClicked.addListener(function(tab)
         {       
             bm.tabid=bm.isTabValid(tab)?tab.id:null;    
             bm.persist.get('wTags', bm.createWindow);// initialize bm.winid
-            wx.browserAction.setIcon({path: "img/19.png"});
+            wx.browserAction.setIcon({path:{
+            "16": "img/16.png",
+            "19": "img/19.png",     
+            "32": "img/32.png",
+            "38": "img/38.png"     
+            }});
             bm.loaded = false;
         }
     });
@@ -285,6 +335,16 @@ wx.runtime.onMessage.addListener(function(message, sender, sendResponse)
             bm.startHighligth();
             wx.windows.update(bm.winid, {"focused":true}); 
             break ;   
+        case 'bm_enableList':   
+            if (bm.tabid)
+            {           
+                bm.doEnableList() ;
+            }
+            else
+            {
+                bm.reInit();
+            }                               
+            break ;             
         case 'bm_enableView':   
             if (bm.tabid)
             {
@@ -327,7 +387,17 @@ wx.windows.onRemoved.addListener(function(windowId)
         bm.disableView() ;
         bm.tabid = null;
         bm.winid = null;                
-        wx.browserAction.setIcon({path: "img/19bw.png"});
+        wx.browserAction.setIcon(
+        {
+            path: 
+            {
+            "16": "img/16bw.png",
+            "19": "img/19bw.png",       
+            "32": "img/32bw.png",
+            "38": "img/38bw.png"    
+            } 
+        }
+        );
     }  
 });
 /**

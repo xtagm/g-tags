@@ -10,7 +10,6 @@
 var tc=
 {
     state : {checks:{}, bar:true},
-    rclick: false,
     record : true,
     timeout : 0,
     timer : null,    
@@ -181,10 +180,14 @@ var tc=
     /**
      * Retrieve tag content as tabulated text
      */
-    getTagText : function(node)
+    getTagText : function(node, withQuery)
     {
-        var row=tv.getTableRowHeads(node, '\t'), att=node.getAttribute('index'), index=att?parseInt(att,10):-1;
-        row+=((index>=0 && index<tc.rqurl.length)?('\t'+decodeURIComponent(tc.rqurl[index])):'');
+        var row=tv.getTableRowHeads(node, '\t'), att=node.getAttribute('index'), index=att?parseInt(att,10):-1, url='';
+        row+=((index>=0 && index<tc.rqurl.length)?('\t'+decodeURIComponent(url=tc.rqurl[index])):'');
+        if (withQuery && url)
+        {
+            row+=('\t'+tp.getDataQuery(url, tc.getUrlParser(url)));
+        }
         return row;    
     },    
     /**
@@ -296,7 +299,7 @@ var tc=
             if (an[i].style.display===tv.vRow)
             {
                 c++;
-                s+=tc.getTagText(an[i])+'\r\n';
+                s+=tc.getTagText(an[i], true)+'\r\n';
             }
         }
         if (s)
@@ -333,6 +336,16 @@ var tc=
     {
         tc.toggleBar(false);       
     },
+    /**
+     * Click on tag lister
+     */
+    onClickList:function()
+    {
+        setTimeout(function()
+        {            
+            tm.wx.runtime.sendMessage({type:'bm_enableList'});                
+        },100);
+    },    
     /**
      * Click on tag viewer
      */
@@ -378,7 +391,15 @@ var tc=
     {         
         var user={email:tr.tEmail.value,pwd:tr.tPwd.value,period:tr.sPeriod.options[tr.sPeriod.selectedIndex].value};
         tc.settings=user; 
-        tp.checkCredentials(tc.onCredentials, tc.onCredentialsFailure, {email:user.email, pwd:user.pwd}); 
+        if (user.email)
+        {
+            tp.checkCredentials(tc.onCredentials, tc.onCredentialsFailure, {email:user.email, pwd:user.pwd});
+        }
+        else
+        {
+            user.pwd='';
+            tp.onCredentials({UserID:'empty'});
+        } 
         return false;
     },   
     /**
@@ -437,18 +458,9 @@ var tc=
         /*
          * Right Double-click handler
          */
-        document.body.oncontextmenu=function(event) 
+        document.body.oncontextmenu=function(e) 
         {
-            if (tc.rclick)    
-            {
-                tc.rclick=false;
-                tc.onDoubleClickRight(event);
-            }
-            else
-            {
-               tc.rclick=true;
-               setTimeout(function(){tc.rclick=false;},500);
-            }
+            tc.onClickRight(e);
             return false;
         };        
     },
@@ -495,6 +507,10 @@ var tc=
         /*
          * Viewers and user settings
          */
+        if (tr.bList)
+        {
+            tr.bList.addEventListener(cev, tc.onClickList);
+        }        
         if (tr.bView)
         {
             tr.bView.addEventListener(cev, tc.onClickView);
@@ -694,7 +710,7 @@ var tc=
      */
     copyTag : function(node)
     {
-        var s=tc.getTagText(node);
+        var s=tc.getTagText(node, true);
         if (s)
         {
             tm.wx.runtime.sendMessage({type: 'bm_copy', text: s});
@@ -724,7 +740,7 @@ var tc=
         tr.dMsg.style.visibility="hidden";
         tr.dMsg.innerHTML='';
     }, 
-    showMsgBar : function(msg, fnEnd)
+    showMsgBar : function(msg, fnEnd, noHide)
     {
         tr.dHelp.innerHTML=msg;
         var rc = tr.bUser?tr.bUser.getBoundingClientRect():tr.cAdvanced.parentNode.getBoundingClientRect(), delay=2500; 
@@ -732,10 +748,20 @@ var tc=
         tr.dHelp.style.left = (rc.right+8).toString() + "px";              
         tr.dHelp.style.visibility="visible";
         tr.dHelp.style.opacity="1";
-        setTimeout(tc.hideMsgBar, delay);
-        if (fnEnd)
+        if (noHide)
         {
-            setTimeout(fnEnd, delay);
+            if (fnEnd)
+            {
+                setTimeout(fnEnd, 10);
+            }            
+        }
+        else
+        {
+            setTimeout(tc.hideMsgBar, delay);
+            if (fnEnd)
+            {
+                setTimeout(fnEnd, delay);
+            }
         }
     }, 
     hideMsgBar : function()
@@ -743,21 +769,36 @@ var tc=
         tr.dHelp.style.opacity="0";
         tr.dHelp.style.visibility="hidden";
         tr.dHelp.innerHTML='';
-    },         
+    },
     /**
-     * Double-click on tag event
+     * Double-click on tag event : toggle row advanced details
      */
     onDoubleClickTag : function(e)
-    {        
-        if (!e.target.previousSibling)
-        {            
-            if (window.getSelection)
-            {
-                window.getSelection().removeAllRanges();
-            }
-            tc.toggleRow(this);           
-        }   
-        else
+    {                  
+        if (window.getSelection)
+        {
+            window.getSelection().removeAllRanges();
+        }
+        tc.toggleRow(this);           
+        e.preventDefault();
+        e.stopPropagation();
+        return false;
+    },
+    /**
+     * Right click
+     */
+    onClickRight:function(e)
+    {
+        if (e.target.classList.contains(tr.cnDLink) || e.target.parentNode.classList.contains(tr.cnDLink))
+        {
+            tc.onClickRowData(e);
+        }
+        else if (e.target.tagName==='A')
+        {
+            tm.wx.runtime.sendMessage({type: 'bm_copy', text: e.target.href});
+            tc.showMsgTag(e.target.parentNode, trs.copied);
+        }
+        else if (e.target.previousSibling)
         {       
             var s, r=null;
             if (window.getSelection)
@@ -774,26 +815,7 @@ var tc=
                 tc.showMsgTag(e.target, trs.copied, r, function(){window.getSelection().removeAllRanges();});
             }
         }
-        e.preventDefault();
-        e.stopPropagation();
-        return false;
-    },
-    /**
-     * Right double-clic
-     */
-    onDoubleClickRight:function(e)
-    {
-        var node=e.target.parentNode;
-        while (node && ! node.classList.contains(tr.cnTag))
-        {
-            node=node.parentNode;
-        }
-        if (node)
-        {
-            tc.copyTag(node);
-            tc.showMsgBar(trs.copyDoneOne);
-        }
-    },
+    },    
     /**
      * Click on Online guide book
      */
@@ -804,7 +826,41 @@ var tc=
         {
             window.open(b);
         }
-    },    
+    },
+    /**
+     * Click on row data
+     */
+    onClickRowData:function(e)
+    {
+        var node=e.target.parentNode, nodeMsg=node, att='', index=-1, url='', s='';
+        while (node && ! node.classList.contains(tr.cnTag))
+        {
+            if (node.tagName==='TH')
+            {
+                nodeMsg=node;
+            }
+            node=node.parentNode;
+        }
+        if (node)
+        {
+            att=node.getAttribute('index');
+            index=att?parseInt(att,10):-1;
+            if (index>=0)
+            {
+                url=tc.rqurl[index];
+                if (url)
+                {
+                    s=tp.getDataQuery(url, tc.getUrlParser(url));
+                    if (s)
+                    {
+                        tm.wx.runtime.sendMessage({type: 'bm_copy', text: s});
+                        tc.showMsgTag(nodeMsg, tps.copiedData);                     
+                    }
+                }
+            } 
+        }
+        return true;          
+    },        
     /**
      * Click on row chart
      */
@@ -823,11 +879,30 @@ var tc=
         }
     },
     /**
+     * Click on row copy
+     */
+    onClickRowCopy:function(e)
+    {
+        var node=e.target.parentNode;
+        while (node && ! node.classList.contains(tr.cnTag))
+        {
+            node=node.parentNode;
+        }
+        if (node)
+        {
+            tc.copyTag(node);
+            tc.showMsgBar(trs.copyDoneOne);
+        }
+    },          
+    /**
      * Request recording
      */
     addRequest : function(rq, tu)
     {
-        tc.rqdone[rq.requestId]={requestId:rq.requestId,tabId:rq.tabId,url:rq.url,timeStamp:rq.timeStamp,tabUrl:tu,done:false};
+        if (!tc.rqdone[rq.requestId])
+        {
+            tc.rqdone[rq.requestId]={requestId:rq.requestId,tabId:rq.tabId,url:rq.url,timeStamp:rq.timeStamp,tabUrl:tu,done:false};
+        }
     },
     isFiltered : function(v)
     {
@@ -846,7 +921,7 @@ var tc=
      */
     addTag : function(rq)
     {       
-        var node=null, content='', i=0, c=0, cs=1, v='',param=null, params=null,isBr=true, ah=[], ap=[], scontent='',cn='',
+        var node=null, icon=null,content='', i=0, c=0, cs=1, v='',param=null, params=null,isBr=true, ah=[], ap=[], scontent='',cn='',
         date=new Date(rq.timeStamp), index = 0, cmin=1,
         hdr=ts.header, tmt=tm.type,
         visible=true, translate=false, ptrans=false,
@@ -866,7 +941,8 @@ var tc=
         
         /* Header row: Tag type column */   
         val=tc.getParamValue(params, (tmt.cta?hdr.type.cta:(tmt.other?hdr.type.other:hdr.type.page)), true)||(tmt.cta?trs.cta:(tmt.other?trs.other:trs.page));
-        content+=tv.nodeHeaderCellType(tp.getTypeLabel(val), tr.cnType, (tc.lastParam.v?('['+tc.lastParam.p+'='+tc.lastParam.v+'] '):'')+trs.rowDoubleClic, null, tp.isTypeChart(val));
+        content+=tv.nodeHeaderCellType(tp.getTypeLabel(val), tr.cnType, (tc.lastParam.v?('['+tc.lastParam.p+'='+tc.lastParam.v+'] '):'')+trs.rowDoubleClick, 
+                                       null, tp.isTypeChart(val), tp.getDataLink());
                 
         /* Header row: space column (mandatory) */
         for (i=0,c=0;i<hdr.space.length;i++)
@@ -875,13 +951,12 @@ var tc=
             if (v)
             {
                 /* Check filtered space */
-                if (tc.isFiltered(v))
+                if (!tc.isFiltered(v))
                 {
-                    return;
+                    v=tp.getSpaceLabel(v);
+                    content+=tv.nodeHeaderCell(v, tr.cnSpace, tc.getTitle(hdr.space[i][0], trs.rightClick));
+                    c++;    
                 }
-                v=tp.getSpaceLabel(v);
-                content+=tv.nodeHeaderCell(v, tr.cnSpace, tc.getTitle(hdr.space[i][0], trs.doubleclic));
-                c++;    
                 break;            
             }
         } 
@@ -902,7 +977,7 @@ var tc=
             if (v)
             {
                 v=tp.getSubLabel(tm.last, v); 
-                content+=tv.nodeHeaderCell(v, tr.cnSub, tc.getTitle(hdr.spsub[i][0], trs.doubleclic));
+                content+=tv.nodeHeaderCell(v, tr.cnSub, tc.getTitle(hdr.spsub[i][0], trs.rightClick));
                 c++;
                 break;
             }
@@ -921,7 +996,7 @@ var tc=
             v=tc.getParamValue(params, ah[i], true);
             if (v)
             {
-                content+=tv.nodeHeaderCell(v, tr.cnSub, tc.getContextTitle(ah[i],trs.doubleclic));
+                content+=tv.nodeHeaderCell(v, tr.cnSub, tc.getContextTitle(ah[i],trs.rightClick));
                 c++;
                 break;
             }
@@ -943,7 +1018,7 @@ var tc=
                 v=v.split('&')[0];
                 if (v)
                 {
-                    content+=tv.nodeHeaderCell(v, tr.cnName, tc.getContextTitle(ah[i],trs.doubleclic), '', cs);
+                    content+=tv.nodeHeaderCell(v, tr.cnName, tc.getContextTitle(ah[i],trs.rightClick), '', cs);
                     cs=1;
                     c++;
                     break;
@@ -956,8 +1031,8 @@ var tc=
             content+=tv.nodeHeaderCellEmpty(cs);
         }            
         /* Header row: Page URL and Time columns */
-        content+=tv.nodeHeaderCellUrl((tp.isURL()?tc.getUrl(rq.tabUrl):''), tr.cnUrl, trs.tagurl,(withUrl?tv.vCell:tv.vNone),rq.tabUrl);
-        content+=tv.nodeHeaderCell(tv.noBreak(date.toLocaleTimeString()), tr.cnTime);
+        content+=tv.nodeHeaderCellUrl((tp.isURL()?tc.getUrl(rq.tabUrl):''), tr.cnUrl, trs.rightClick,(withUrl?tv.vCell:tv.vNone),rq.tabUrl, trs.tagurl);
+        content+=tv.nodeHeaderCellTime(tv.noBreak(date.toLocaleTimeString()), tr.cnTime, trs.rightClick);
         
         /* Header row node creation */
         cn=(tmt.cta?tr.cnCTA:(tmt.other?tr.cnOther:tr.cnPage));
@@ -965,13 +1040,27 @@ var tc=
         tr.dTags.appendChild(node);
         /* Double click listener */
         node.addEventListener('dblclick', tc.onDoubleClickTag);
-        /* Click on Chart icon listener */
-        node=node.querySelector('.cchart');
-        if (node)
+        /* Click on Data link listener */
+        icon=node.querySelector('.dlink');
+        if (icon)
         {
-            node.title=trs.title.rowchart;
-            node.addEventListener('click', tc.onClickRowChart);
+            icon.title=tps.title.rowdata;
+            icon.addEventListener('click', tc.onClickRowData);
+        }               
+        /* Click on Chart icon listener */
+        icon=node.querySelector('.cchart');
+        if (icon)
+        {
+            icon.title=trs.title.rowchart;
+            icon.addEventListener('click', tc.onClickRowChart);
         }
+        /* Click on Copy icon listener */
+        icon=node.querySelector('.ccopy');
+        if (icon)
+        {
+            icon.title=tps.title.rowcopy;
+            icon.addEventListener('click', tc.onClickRowCopy);
+        }           
                 
         /* Details row **************************************************/
         
@@ -1091,7 +1180,7 @@ var tc=
         if (tc.record)
         {
             /* When still not done, collect the request before any redirection */
-            if (!tc.rqdone[rq.requestId] && tp.isRequest(rq))
+            if (rq.tabId >=0 && !tc.rqdone[rq.requestId] && tp.isRequest(rq))
             {                
                 tm.wx.tabs.get(rq.tabId,function(Tab){tc.addRequest(rq, Tab.url);});
             }
@@ -1126,11 +1215,31 @@ var tc=
                 /* Bad request: log message */
                 else
                 {
-					console.log(tps.name+" >> "+rq.url+" has returned status code:"+rq.statusCode.toString());
+					tc.onErrorOccurred(rq);
                 }
             }
         }          
     },
+    onErrorOccurred : function(rq)
+    {        
+        if (tc.record && (!rq.error || rq.error.indexOf('ERR_ABORTED')<0))
+        {
+            var sRq=tc.rqdone[rq.requestId], reason=rq.statusCode?rq.statusCode.toString():(rq.error||'');
+            if (!sRq)
+            {
+                tc.addRequest(rq);
+                sRq=tc.rqdone[rq.requestId];
+            }
+            if (sRq && !sRq.done)
+            {
+                tc.rqdone[rq.requestId].done=true;
+                console.log(tps.name+" >> "+rq.url+" has returned: "+reason);
+                chrome.runtime.sendMessage({type:'bm_copy', text:reason+'\t'+rq.url+'\r\n'});
+                tm.wx.runtime.sendMessage({type:'bm_newtag'});
+                tc.showMsgBar(trs.badRequest);
+            }
+        }          
+    },    
     onKeyDown : function(e)
     {
         if (tc.view || tc.chart)
@@ -1168,6 +1277,7 @@ window.document.addEventListener("keydown", tc.onKeyDown);
  */
 tm.wx.webRequest.onSendHeaders.addListener(tc.onSendHeaders, {urls:tp.urls});
 tm.wx.webRequest.onHeadersReceived.addListener(tc.onHeadersReceived, {urls:tp.urls});
+tm.wx.webRequest.onErrorOccurred.addListener(tc.onErrorOccurred, {urls:tp.urls});
 /**
  * Custom events listener
  */
@@ -1198,7 +1308,13 @@ tm.wx.runtime.onMessage.addListener(function(request, sender, sendResponse)
                 toggleUser();
             }
         } 
-        break;        
+        break;   
+    case 'tc_message':
+        if (request.text)
+        {
+            tc.showMsgBar(request.text, null, request.nohide);
+        }
+        break;     
     }
 });
 

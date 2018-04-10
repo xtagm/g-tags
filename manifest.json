@@ -1,31 +1,33 @@
 {
-	"name": "G-Tags | Google Analytics tags tracker",
-	"short_name" : "G-Tags",
+	"name": "XTag Google Analytics: Record and check",
+	"short_name" : "XTag GA",
 	"manifest_version": 2,
-	"version": "6.0.2",
+	"version": "7.0.1",
 	"minimum_chrome_version":"44.0.2403",
 
-	"description": "Catch all Google Analytics tags. Filter by type and details. Parameters meaning. Copy/Paste in tabulated format (Excel compliant).", 
+	"description": "Categorize, record and display Google Analytics tags, with parameters meaning.", 
 
 	"icons": {
 		"16": "img/16.png",
-		"19": "img/19.png",
-		"22": "img/22.png",
-		"24": "img/24.png",
+		"19": "img/19.png",		
+		"24": "img/24.png",		
 		"32": "img/32.png",
+		"38": "img/38.png",
 		"48": "img/48.png",
-		"128": "img/128.png"
+		"128": "img/128.png"		
 	},
 
 	"options_page": "option.html",
 	"background": { "page":"background.html" },
 
 	"browser_action": {
-		"default_icon": 
-		{
-			"19":"img/19bw.png"
+		"default_icon": {
+		"16": "img/16bw.png",
+		"19": "img/19bw.png",		
+		"32": "img/32bw.png",
+		"38": "img/38bw.png"	
 		},
-		"default_title": "G-Tags by Schneider Electric"
+		"default_title": "XTag for Google Analytics"
 	},	
 
 	"permissions": ["storage","clipboardWrite","tabs","webRequest",

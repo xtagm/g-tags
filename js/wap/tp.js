@@ -4,16 +4,19 @@
  */
 var tps=
 {
-    name:'G-Tags',
-    desc:'Google Analytics tags tracker By Schneider Electric',   
+    name:'XTag Google Analytics',
+    desc:'Tags recorder and interpreter',
     credentials:'You need valid Google credentials to display charts', 
+    copiedData:'Query Explorer data copied',  
     /**
      * Customization
      **/
     cta:"Event",
     title:{
         cta:"Show/Hide Event tags",
-        other:" (Display advertising, Timing, Transaction, Item, Custom...)"
+        other:"Show/Hide other tags (Display advertising, Timing, Transaction, Item, Custom...)",
+        rowdata:"Copy data and open Query Explorer to import - Right Click to just copy",
+        rowcopy:"Copy this tag"        
     },
     clabel:{
         cta:"Events"
@@ -24,10 +27,9 @@ var tps=
  */
 var tp=
 {
-    urls:["*://*.google-analytics.com/__utm.gif*",
-    "*://*.google-analytics.com/r*",
+    urls:["*://*.google-analytics.com/__utm.gif*","*://*.google-analytics.com/r*",
     "*://*.google-analytics.com/collect*",
-    "*://stats.g.doubleclick.net/__utm.gif*",
+    "*://stats.g.doubleclick.net/__utm.gif*", 
     "*://stats.g.doubleclick.net/collect*",
     "*://stats.g.doubleclick.net/r*"],
 
@@ -35,20 +37,31 @@ var tp=
     {
         
     },
+    /**
+     * Retrieve current user 
+     */     
     getUser:function()
     {
         return '';
     },
+    /**
+     * Ask if it is a request to capture 
+     */    
     isRequest:function(rq)
     {
         return true;  
-    },    
+    },  
+    /**
+     * Init the platform 
+     */      
     init:function()
     {
+        /*
         trs.cta=tps.cta;
         trs.title.cta=tps.title.cta;
         trs.title.other+=tps.title.other;
         trs.clabel.cta=tps.clabel.cta;
+        */
     },
     /**
      * Record parameters, initialize type
@@ -144,12 +157,33 @@ var tp=
         return tv.noBreak(label);         
     },
     /**
+     * Check credentials 
+     */   
+    checkCredentials : function(fnSuccess, fnFailure, user)
+    {        
+    },    
+    /**
      * Online guide URL 
      */
     getBook : function()
     {
         return "";
-    }       
+    },
+    /**
+     * Get data query from list of request parameters
+     */
+    getDataQuery : function(url, params)
+    {
+        var q='';
+        return q;
+    },
+    /**
+     * Link used to extract tag data 
+     */       
+     getDataLink:function()
+     {
+         return '';
+     }            
 };
 
 var tpse=

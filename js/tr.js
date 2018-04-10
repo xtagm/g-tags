@@ -12,13 +12,14 @@ var trs=
        
     stop:"Stop recording",
     resume:"Resume recording",
-    copyDone:'# tags have been copied in the clipboard,\r\nYou can paste in Excel.',
-    copyDoneOne:'1 tag has been copied in the clipboard,\r\nYou can paste in Excel.',
+    copyDone:'# tags have been copied in the clipboard, you can paste in Excel.',
+    copyDoneOne:'1 tag has been copied in the clipboard, you can paste in Excel.',
+    badRequest:'Bad tag request copied in the clipboard (not recorded)',
     expand:"Click to expand control bar",
-    rowDoubleClic:"Double click to show/hide all tag parameters",
-    doubleclic:"Double click to copy value (left btn) / tag (right btn)",
-    tagurl:"Reopen page",
-    copied:'Copied',
+    rowDoubleClick:"Double click to show/hide all tag parameters",
+    rightClick:"Right click to copy this value",
+    tagurl:"Reopen page - Right click to copy URL",
+    copied:'Copied',    
        
     title:{
         page:"Show/Hide Page tags",
@@ -31,9 +32,10 @@ var trs=
         copy:"Copy all displayed tags",
         chevron:"Collapse control bar",
         record:"Stop recording", 
-        view:"(setm) In-Page CTAs Spy",
+        view:"(xtm/setm) In-Page CTAs Spy",
         viewon:"Deactivate In-Page CTAs Spy",
-        chart:"(setm) In-Page CTAs Charts",
+        list:"(xtm/setm - beta) Copy all CTAs tracked in this page",
+        chart:"(xtm/setm) In-Page CTAs Charts",
         dash:"Contextual Dashboard (granted users)",
         charton:"Deactivate In-Page CTAs Charts",
         book:"Online guide",
@@ -75,6 +77,7 @@ var tr=
     cnActive:"active",
     cnReduced:"reduced",
     cnView:"view",
+    cnDLink:"dlink",
     
 
     acbx:[],
@@ -85,7 +88,7 @@ var tr=
     {
         /* Nodes */
         var i=0, node=null, id='',title='';
-        an=['cPage','cCTA','cOther','cUrl','cDetails','cAdvanced','bView','bChart','bUser','bChevron','bCopy','bBook','bClear','bApply','dRecord','dBar','dTags','dContent','dMsg',
+        an=['cPage','cCTA','cOther','cUrl','cDetails','cAdvanced','bList','bView','bChart','bUser','bChevron','bCopy','bBook','bClear','bApply','dRecord','dBar','dTags','dContent','dMsg',
             'dHelp','dUserContent','fUserForm','tEmail','tPwd','sPeriod'];
         for (i=0;i<an.length;i++)
         {
@@ -95,13 +98,13 @@ var tr=
             {
                 if (an[i].charAt(0)==='c')
                 {
-                    node.nextSibling.nextSibling.innerHTML=trs.clabel[id]||'';
+                    node.nextSibling.nextSibling.innerHTML=tps.clabel[id]||trs.clabel[id]||'';
                     tr.acbx.push(node);
-                    node.parentNode.title=trs.title[id]||'';
+                    node.parentNode.title=tps.title[id]||trs.title[id]||'';
                 }
                 else
                 {
-                    title=trs.title[id];
+                    title=tps.title[id]||trs.title[id]||'';
                     if (title)
                     {
                         node.title=title;

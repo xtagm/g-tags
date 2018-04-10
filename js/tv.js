@@ -59,21 +59,32 @@ tv=
     /**
      * Create a table header cell node
      */
-    nodeHeaderCellType : function(content, className, title, display, icon)
+    nodeHeaderCellType : function(content, className, title, display, icon, dlink)
     {
+        if (dlink)
+        {
+            content='<a target="_blank" class="dlink" href="'+dlink+'"'+'>'+content+'</a>';
+        }
         if (icon)
         {
             content='<div style="display:flex;">'+content+'<span'+tv.nodeAttr('class', 'cchart cicon cghost')+'></span></div>';
         }
-        return ('<th'+tv.nodeAttr('class', className)+(display?tv.nodeAttr('style','display:'+display+';'):'')+tv.nodeAttr('title', title)+'>'+content+'</th>');
+        return tv.nodeHeaderCell(content, className, title, display);
     },
     /**
      * Create a table header cell node for URL
      */
-    nodeHeaderCellUrl : function(content, className, title, display, url)
+    nodeHeaderCellUrl : function(content, className, title, display, url, titleUrl)
     {
-        return ('<th'+tv.nodeAttr('class', className)+(display?tv.nodeAttr('style','display:'+display+';'):'')+'><a target="_blank" href="'+url+'"'+tv.nodeAttr('title', title)+'>'+content+'</a></th>');
-    },    
+        return tv.nodeHeaderCell('<a target="_blank" href="'+url+'"'+tv.nodeAttr('title', titleUrl)+'>'+content+'</a>', className, title, display);
+    },  
+    /**
+     * Create a table header cell node for time
+     */
+    nodeHeaderCellTime : function(content, className, title)
+    {
+        return tv.nodeHeaderCell(content+'<span'+tv.nodeAttr('class', 'ccopy cicon cghost cgright')+'></span>', className, title);
+    },        
     /**
      * Create a table header cell node
      */
@@ -99,7 +110,6 @@ tv=
         if (typeof index==='number')
         {  
             node.setAttribute('index',index.toString());
-            node.title=trs.doubleclic;
         }       
         node.innerHTML = content;   
         return node; 

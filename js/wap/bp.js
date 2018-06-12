@@ -7,6 +7,6 @@ var bps=
     url:
     {
         install : "option.html",
-        update : ""
+        update : "option.html"
     }
 };

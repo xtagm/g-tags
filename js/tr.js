@@ -11,7 +11,7 @@ var trs=
     other:"Other",
        
     stop:"Stop recording",
-    resume:"Resume recording",
+    resume:"Resume recording",    
     copyDone:'# tags have been copied in the clipboard, you can paste in Excel.',
     copyDoneOne:'1 tag has been copied in the clipboard, you can paste in Excel.',
     badRequest:'Bad tag request copied in the clipboard (not recorded)',
@@ -19,7 +19,8 @@ var trs=
     rowDoubleClick:"Double click to show/hide all tag parameters",
     rightClick:"Right click to copy this value",
     tagurl:"Reopen page - Right click to copy URL",
-    copied:'Copied',    
+    copied:'Copied', 
+    empty: '(empty: logged as url)',   
        
     title:{
         page:"Show/Hide Page tags",
@@ -32,17 +33,19 @@ var trs=
         copy:"Copy all displayed tags",
         chevron:"Collapse control bar",
         record:"Stop recording", 
-        view:"(xtm/setm) In-Page CTAs Spy",
-        viewon:"Deactivate In-Page CTAs Spy",
-        list:"(xtm/setm - beta) Copy all CTAs tracked in this page",
-        chart:"(xtm/setm) In-Page CTAs Charts",
+        view:"(xtm/setm) In-Page CTA Spy",
+        viewon:"Deactivate In-Page CTA Spy",
+        list:"(xtm/setm - beta) CTA List",
+        chart:"(xtm/setm) In-Page CTA Charts",
         dash:"Contextual Dashboard (granted users)",
-        charton:"Deactivate In-Page CTAs Charts",
+        charton:"Deactivate In-Page CTA Charts",
         book:"Online guide",
-        user:"User identification & settings (for CTAs charts)",
+        user:"User identification & settings (for CTA charts)",
         useron:"Close user settings without validation",
         apply:"Record user settings changes",
-        rowchart:"CTA Chart"
+        rowchart:"CTA Chart",
+        raise:"Activate raising for each tag",
+        raiseon:"Stop raising"
     }, 
     clabel:{
         page:"Pages",
@@ -88,7 +91,7 @@ var tr=
     {
         /* Nodes */
         var i=0, node=null, id='',title='';
-        an=['cPage','cCTA','cOther','cUrl','cDetails','cAdvanced','bList','bView','bChart','bUser','bChevron','bCopy','bBook','bClear','bApply','dRecord','dBar','dTags','dContent','dMsg',
+        an=['cPage','cCTA','cOther','cUrl','cDetails','cAdvanced','bList','bView','bRaise','bChart','bUser','bChevron','bCopy','bBook','bClear','bApply','dRecord','dBar','dTags','dContent','dMsg',
             'dHelp','dUserContent','fUserForm','tEmail','tPwd','sPeriod'];
         for (i=0;i<an.length;i++)
         {

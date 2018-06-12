@@ -2,7 +2,7 @@
 	"name": "XTag Google Analytics: Record and check",
 	"short_name" : "XTag GA",
 	"manifest_version": 2,
-	"version": "7.0.1",
+	"version": "7.1.0",
 	"minimum_chrome_version":"44.0.2403",
 
 	"description": "Categorize, record and display Google Analytics tags, with parameters meaning.", 

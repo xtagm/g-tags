@@ -187,14 +187,7 @@ var bm=
             }
             else
             {
-                bm.clipboard='';
-                setTimeout(function()
-                {
-                    wx.tabs.get(bm.tabid, function(tab) 
-                    {   
-                        wx.windows.update(tab.windowId, {"focused":true}); 
-                    });
-                },200);                
+                bm.clipboard='';             
             }
         });
     },
@@ -246,6 +239,10 @@ var bm=
             });
         }
     },
+    onPopup : function(tab)
+    {
+        bm.activate(tab);  
+    },
     startHighligth :function()
     {
         if (!bm.timeoutID)
@@ -266,6 +263,18 @@ var bm=
         {
             bm.winid=w.id;
         });
+    },
+    activate:function(tab)
+    {
+        bm.tabid=bm.isTabValid(tab)?tab.id:null;    
+        bm.persist.get('wTags', bm.createWindow);// initialize bm.winid
+        wx.browserAction.setIcon({path:{
+        "16": "img/16.png",
+        "19": "img/19.png",     
+        "32": "img/32.png",
+        "38": "img/38.png"     
+        }});
+        bm.loaded = false;        
     }
 };
 /*****************************************************************
@@ -284,15 +293,7 @@ wx.browserAction.onClicked.addListener(function(tab)
         }
         else
         {       
-            bm.tabid=bm.isTabValid(tab)?tab.id:null;    
-            bm.persist.get('wTags', bm.createWindow);// initialize bm.winid
-            wx.browserAction.setIcon({path:{
-            "16": "img/16.png",
-            "19": "img/19.png",     
-            "32": "img/32.png",
-            "38": "img/38.png"     
-            }});
-            bm.loaded = false;
+            bm.activate(tab);
         }
     });
 });
@@ -307,10 +308,18 @@ if (wx.runtime.onInstalled)
 {
 	wx.runtime.onInstalled.addListener(function(details)
 	{
-        if(details.reason === "install" /*|| details.reason === "update"*/)
+        switch (details.reason)
         {
-            wx.tabs.create( {url: bps.url[details.reason]} );
-        }
+        case "install":
+            if (bps.url[details.reason])
+            {
+                wx.tabs.create( {url: bps.url[details.reason]} );
+            }
+            break;
+        case "update":
+            wx.browserAction.setPopup({popup:"popup.html"});
+            break;
+        }               
 	});
 }
 /**
@@ -322,6 +331,19 @@ wx.runtime.onMessage.addListener(function(message, sender, sendResponse)
     {    
         switch (message.type)
         {
+        case 'bm_popup':
+            wx.tabs.query({active:true},function(tabs)
+            {
+                if (tabs.length) 
+                {
+                    bm.onPopup(tabs[0]);
+                }
+            });
+            wx.browserAction.setPopup({popup:""});
+            break;
+        case 'bm_update':
+            wx.tabs.create( {url: bps.url.update} );
+            break;
         case 'bm_copy':
             bm.onCopy(message.text);
             break;
@@ -333,6 +355,8 @@ wx.runtime.onMessage.addListener(function(message, sender, sendResponse)
             break;
         case 'bm_newtag':
             bm.startHighligth();
+            break;
+        case 'bm_focus':
             wx.windows.update(bm.winid, {"focused":true}); 
             break ;   
         case 'bm_enableList':   
@@ -369,6 +393,12 @@ wx.runtime.onMessage.addListener(function(message, sender, sendResponse)
         case 'bm_disableView':       
             bm.disableView() ;                
             break ;
+        case 'bm_focustab':
+            wx.tabs.get(bm.tabid, function(tab) 
+            {   
+                wx.windows.update(tab.windowId, {"focused":true}); 
+            });
+            break;
         }
     }
 });
@@ -407,14 +437,17 @@ wx.windows.onFocusChanged.addListener(function(windowId)
 {
    if (bm.winid && bm.winid!==windowId)
    {
-        bm.onSizeChanged();       
-        wx.tabs.getSelected(windowId, function(tab)
-        {
-            if (tab.id!==bm.tabid)
+        bm.onSizeChanged();   
+        if (windowId && windowId!==-1)
+        {    
+            wx.tabs.getSelected(windowId, function(tab)
             {
-                bm.onTabChanged(tab.id);
-            }
-        }); 
+                if (tab.id!==bm.tabid)
+                {
+                    bm.onTabChanged(tab.id);
+                }
+            }); 
+        }
    }    
 });
 

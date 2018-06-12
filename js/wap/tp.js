@@ -172,7 +172,7 @@ var tp=
     /**
      * Get data query from list of request parameters
      */
-    getDataQuery : function(url, params)
+    getDataQuery : function(url, params, purl)
     {
         var q='';
         return q;
@@ -183,7 +183,15 @@ var tp=
      getDataLink:function()
      {
          return '';
-     }            
+     },
+    /**
+      * Return a name substitute in case of empty name
+      */
+     getEmptyNameSubstitute:function(type,url)
+     {
+         v='';
+         return v;
+     }
 };
 
 var tpse=
@@ -216,6 +224,7 @@ var tpse=
     'UA-8189219-29':'SE Indonesia - ID',
     'UA-7637623-2': 'SE United States',
     'UA-46644293-1': 'APC',
+    'UA-46644293-6': 'APC (Test)',
     'UA-2449534-1': 'SE United Kingdom',
     'UA-60277833-1': 'SE Norway'
 };

@@ -9,7 +9,7 @@
  */
 var tc=
 {
-    state : {checks:{}, bar:true},
+    state : {checks:{}, bar:true, raise:true},
     record : true,
     timeout : 0,
     timer : null,    
@@ -182,11 +182,12 @@ var tc=
      */
     getTagText : function(node, withQuery)
     {
-        var row=tv.getTableRowHeads(node, '\t'), att=node.getAttribute('index'), index=att?parseInt(att,10):-1, url='';
+        var row=tv.getTableRowHeads(node, '\t'), att=node.getAttribute('index'), index=att?parseInt(att,10):-1, url='',purl=null;
         row+=((index>=0 && index<tc.rqurl.length)?('\t'+decodeURIComponent(url=tc.rqurl[index])):'');
         if (withQuery && url)
         {
-            row+=('\t'+tp.getDataQuery(url, tc.getUrlParser(url)));
+            purl=node.querySelector('.'+tr.cnUrl+ '>a');
+            row+=('\t'+tp.getDataQuery(url, tc.getUrlParser(url), purl?purl.href:''));
         }
         return row;    
     },    
@@ -287,7 +288,14 @@ var tc=
     onCheckAdvanced: function(e)
     {
         tc.infosCheckChanged(this,'.'+tr.cnInfo+'.'+tr.cnAdvanced);
-    },      
+    }, 
+    /**
+     * Click on Raise
+     */
+    onClickRaise:function()
+    {
+        tc.toggleRaise();     
+    },           
     /**
      * Clipoard copy event
      */
@@ -444,14 +452,21 @@ var tc=
                 {
                     tc.state.bar=item.statebar;
                 }
-                tm.persist.get('user', function(item)
+                tm.persist.get('stateraise', function(item)
                 {
-                    if (typeof item.user==='object')
+                    if (typeof item.stateraise==='boolean')
                     {
-                        tc.settings=item.user;
-                        tp.setUser(tc.settings);
+                        tc.state.raise=item.stateraise;
                     }                    
-                    tc.onLoadState();
+                    tm.persist.get('user', function(item)
+                    {
+                        if (typeof item.user==='object')
+                        {
+                            tc.settings=item.user;
+                            tp.setUser(tc.settings);
+                        }                    
+                        tc.onLoadState();
+                    });
                 });
             });                      
         });
@@ -523,6 +538,10 @@ var tc=
         {
             tr.bUser.addEventListener(cev, tc.onClickUser);
         }
+        if (tr.bRaise)
+        {
+            tr.bRaise.addEventListener(cev, tc.onClickRaise);
+        }        
         /*
          * User settings form
          */
@@ -537,7 +556,9 @@ var tc=
         if (!tc.state.bar)
         {
             setTimeout(function(){tc.toggleBar(false);}, 1000);
-        }        
+        }   
+        setTimeout(function(){tc.toggleRaise(tc.state.raise);}, 10);
+
         tc.recordChanged(); 
     },
     /**
@@ -695,6 +716,27 @@ var tc=
         }
     }, 
     /**
+     * Enable/Disable tags raising
+     */
+    toggleRaise : function(forced)
+    {        
+        if (tr.bRaise)
+        {
+            var active=(typeof forced==='boolean')?forced:!tc.state.raise;
+            if (active)
+            {
+                tr.bRaise.classList.add('cenable');
+            }
+            else
+            {                
+                tr.bRaise.classList.remove('cenable');
+            }  
+            tc.state.raise=active;
+            tr.bRaise.title=tc.state.raise?trs.title.raiseon:trs.title.raise;  
+            tm.persist.set({'stateraise':tc.state.raise});                     
+        }
+    },     
+    /**
      * Copy current cell in clipboard
      */    
     copyCell : function(node)
@@ -832,7 +874,7 @@ var tc=
      */
     onClickRowData:function(e)
     {
-        var node=e.target.parentNode, nodeMsg=node, att='', index=-1, url='', s='';
+        var node=e.target.parentNode, nodeMsg=node, att='', index=-1, url='', s='', purl=null;
         while (node && ! node.classList.contains(tr.cnTag))
         {
             if (node.tagName==='TH')
@@ -850,7 +892,8 @@ var tc=
                 url=tc.rqurl[index];
                 if (url)
                 {
-                    s=tp.getDataQuery(url, tc.getUrlParser(url));
+                    purl=node.querySelector('.'+tr.cnUrl+ '>a');
+                    s=tp.getDataQuery(url, tc.getUrlParser(url), (purl?purl.href:''));
                     if (s)
                     {
                         tm.wx.runtime.sendMessage({type: 'bm_copy', text: s});
@@ -925,7 +968,7 @@ var tc=
         date=new Date(rq.timeStamp), index = 0, cmin=1,
         hdr=ts.header, tmt=tm.type,
         visible=true, translate=false, ptrans=false,
-        withUrl= tr.cUrl.checked, infos= tr.cDetails.checked, advanced=false, label='', tip='', val='';
+        withUrl= tr.cUrl.checked, infos= tr.cDetails.checked, advanced=false, label='', tip='', val='', pv='';
         
         /* Mark request as done, store it, extract parameters, compute type and visibility */
         tc.rqdone[rq.requestId].done=true;
@@ -942,7 +985,7 @@ var tc=
         /* Header row: Tag type column */   
         val=tc.getParamValue(params, (tmt.cta?hdr.type.cta:(tmt.other?hdr.type.other:hdr.type.page)), true)||(tmt.cta?trs.cta:(tmt.other?trs.other:trs.page));
         content+=tv.nodeHeaderCellType(tp.getTypeLabel(val), tr.cnType, (tc.lastParam.v?('['+tc.lastParam.p+'='+tc.lastParam.v+'] '):'')+trs.rowDoubleClick, 
-                                       null, tp.isTypeChart(val), tp.getDataLink());
+                                       null, tp.isTypeChart(val), (tp.getDataQuery(rq.url, tc.getUrlParser(rq.url), rq.tabUrl)?tp.getDataLink():''));
                 
         /* Header row: space column (mandatory) */
         for (i=0,c=0;i<hdr.space.length;i++)
@@ -1012,13 +1055,19 @@ var tc=
         for (i=0;i<ah.length;i++)
         {
             v=tc.getParamValue(params, ah[i], true);
+            pv='';
+            if (!v && tp.getEmptyNameSubstitute)
+            {
+                v=tp.getEmptyNameSubstitute(tmt, rq.tabUrl);
+                pv=trs.empty+' ';
+            }
             if (v)
             {
                 // In case of & in name, only the part before will be taken into account
                 v=v.split('&')[0];
                 if (v)
                 {
-                    content+=tv.nodeHeaderCell(v, tr.cnName, tc.getContextTitle(ah[i],trs.rightClick), '', cs);
+                    content+=tv.nodeHeaderCell(v, tr.cnName, pv+tc.getContextTitle(ah[i],trs.rightClick), '', cs);
                     cs=1;
                     c++;
                     break;
@@ -1139,6 +1188,10 @@ var tc=
         if (visible)
         {
             tm.wx.runtime.sendMessage({type:'bm_newtag'});
+            if (tc.state.raise)
+            {
+                tm.wx.runtime.sendMessage({type:'bm_focus'});
+            }
         }    
     },
     /**
@@ -1236,6 +1289,7 @@ var tc=
                 console.log(tps.name+" >> "+rq.url+" has returned: "+reason);
                 chrome.runtime.sendMessage({type:'bm_copy', text:reason+'\t'+rq.url+'\r\n'});
                 tm.wx.runtime.sendMessage({type:'bm_newtag'});
+                tm.wx.runtime.sendMessage({type:'bm_focus'});
                 tc.showMsgBar(trs.badRequest);
             }
         }          

@@ -107,7 +107,7 @@ a {color:#888;}
 	vertical-align:middle
 }
 label {
-	margin-right: 8px;
+	margin-right: 6px;
 	color: #e6e6e6;
 }
 input[type=checkbox] {display: none}
@@ -143,11 +143,12 @@ input[type=checkbox]:checked + label:before {content: "\f046";}
 .cbook:before {content:"\f02d";}
 .clist:before {content:"\f02c";}
 .cdata:before {content:"\f0ed";}
+.cbolt:before {content:"\f0e7";}
 
 
 
-.cenable {color:#efef0d;}
-.cenable:hover {color:#efef0d;}
+.cenable {color:#efef0d !important;}
+.cenable:hover {color:#efef0d !important;}
 
 .cghost 
 {

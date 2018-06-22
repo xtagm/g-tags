@@ -1228,6 +1228,22 @@ var tc=
     /**
      * Request catching events
      */   
+    onBeforeRequest: function(details)
+    {
+        if (details.method==='POST' && tc.record)
+        {
+            var ad=details.requestBody.raw, p='', rq=details;
+            if (ad.length>0)
+            {
+                p=new TextDecoder("utf-8").decode(ad[0].bytes);
+                if (p)
+                {
+                    rq.url+="?"+p;
+                    tm.wx.tabs.get(rq.tabId,function(Tab){tc.addRequest(rq, Tab.url);});
+                }
+            }
+        }
+    },
     onSendHeaders : function(rq)
     {        
         if (tc.record)
@@ -1329,6 +1345,7 @@ window.document.addEventListener("keydown", tc.onKeyDown);
 /**
  * URL requests listener
  */
+tm.wx.webRequest.onBeforeRequest.addListener(tc.onBeforeRequest, {urls:tp.urls},['requestBody']);
 tm.wx.webRequest.onSendHeaders.addListener(tc.onSendHeaders, {urls:tp.urls});
 tm.wx.webRequest.onHeadersReceived.addListener(tc.onHeadersReceived, {urls:tp.urls});
 tm.wx.webRequest.onErrorOccurred.addListener(tc.onErrorOccurred, {urls:tp.urls});

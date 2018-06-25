@@ -61,14 +61,12 @@ tv=
      */
     nodeHeaderCellType : function(content, className, title, display, icon, dlink)
     {
-        if (dlink)
-        {
-            content='<a target="_blank" class="dlink" href="'+dlink+'"'+'>'+content+'</a>';
-        }
+        content=dlink?('<a target="_blank" class="dlink" href="'+dlink+'"'+'>'+content+'</a>'):content;
         if (icon)
         {
-            content='<div style="display:flex;">'+content+'<span'+tv.nodeAttr('class', 'cchart cicon cghost')+'></span></div>';
+            content+='<span'+tv.nodeAttr('class', 'cchart cicon cghost cright')+'></span>';
         }
+        content='<span class="arrow aright"></span>'+content;
         return tv.nodeHeaderCell(content, className, title, display);
     },
     /**

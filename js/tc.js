@@ -3,7 +3,7 @@
  * @author DENIS ROUSSEAU
  * @version 4.6
  ******************************************************************************/
-/*jslint nomen: true, plusplus: true, regexp: true*/
+/*jslint strict: false, plusplus: true, regexp: true, evil: true, continue: true, trailing: false, white: true*/
 /**
  * Tags Controller
  */
@@ -221,10 +221,19 @@ var tc=
      */
     allCheckChanged : function(cbx,selector,visibleStyle,emptyVisible)
     {
-        var an=document.querySelectorAll(selector), i=0, v=(cbx.checked?'1':'0');
+        var an=document.querySelectorAll(selector), i=0, v=(cbx.checked?'1':'0'),nh=null, isAdv=(selector.indexOf(tr.cnAdvanced)>=0);
         for (i=0;i<an.length;i++)
         {
             an[i].style.display=(cbx.checked&&(emptyVisible||an[i].textContent.replace(/(^\s*)/g, "")))?(visibleStyle||"block"):tv.vNone;
+            if (isAdv || an[i].style.display===tv.vNone)
+            {
+                nh=an[i].previousSibling;
+                if (nh.className.indexOf(tr.cnTag)<0)
+                {
+                    nh=nh.previousSibling;
+                }
+                tc.setNodeArrow(nh.querySelector('.arrow'), an[i].style.display!==tv.vNone);
+            }
             if (visibleStyle===tv.vRow && an[i].className.indexOf(tr.cnInfo)<0)
             {
                 tc.toggleRow(an[i],cbx.checked);
@@ -409,7 +418,19 @@ var tc=
             tp.onCredentials({UserID:'empty'});
         } 
         return false;
-    },   
+    },  
+    /**
+     * Expand/Collapse row details
+     */
+    onClickArrow : function(e)
+    {
+
+        var n=this.parentNode.parentNode;
+        if (n.tagName=='TR')
+        {
+            tc.toggleRow(n);     
+        }  
+    },
     /**
      * Credentials validation
      */
@@ -577,6 +598,23 @@ var tc=
         }, 100);        
     },
     /**
+     * Force arrow state
+     */
+    setNodeArrow : function(node, isExpand)
+    {
+        if (node)
+        {
+            if (isExpand) 
+            {
+                node.className = node.className.replace('right', 'down');                    
+            } 
+            else 
+            {
+                node.className = node.className.replace('down', 'right');
+            }   
+        }            
+    },
+    /**
      * Toggle control bar
      */
     toggleBar : function(isVisible)
@@ -601,9 +639,6 @@ var tc=
             tm.persist.set({'statebar':isVisible});
         }
     },
-    /**
-     * Expand/Collapse row details
-     */
     toggleRow : function(row, forced)
     {
         var node=row.nextSibling, vis=true, f=(typeof forced==='boolean'), 
@@ -620,7 +655,8 @@ var tc=
             if (node)
             {
                 vis=toggle(node,vis,false,(!f||(forced&&tr.cAdvanced.checked)));
-            }            
+            }
+            tc.setNodeArrow(row.querySelector('.arrow'), vis);                      
         }
     },    
     /**
@@ -917,8 +953,8 @@ var tc=
         {        
             var rc=e.target.getBoundingClientRect(), p=tv.getTableRowHeads(tv.getNodeTableRow(e.target), ';');
             p=tc.settings.period+';'+p;
-            window.open("rchart.html?p="+encodeURIComponent(p)+'#'+tp.getUser(),"X-Tags Chart","width=350,height=200,titlebar=0,status=0,menubar=0,top="+window.screenY.toString()
-                         +",left="+(window.screenX+rc.left+rc.width+4).toString());
+            window.open("rchart.html?p="+encodeURIComponent(p)+'#'+tp.getUser(),
+            "X-Tags Chart","width=350,height=200,titlebar=0,status=0,menubar=0,top="+window.screenY.toString()+",left="+(window.screenX+rc.left+rc.width+4).toString());
         }
     },
     /**
@@ -964,7 +1000,7 @@ var tc=
      */
     addTag : function(rq)
     {       
-        var node=null, icon=null,content='', i=0, c=0, cs=1, v='',param=null, params=null,isBr=true, ah=[], ap=[], scontent='',cn='',
+        var node=null, icon=null, arrow=null, content='', i=0, c=0, cs=1, v='',param=null, params=null,isBr=true, ah=[], ap=[], scontent='',cn='',
         date=new Date(rq.timeStamp), index = 0, cmin=1,
         hdr=ts.header, tmt=tm.type,
         visible=true, translate=false, ptrans=false,
@@ -984,8 +1020,8 @@ var tc=
         
         /* Header row: Tag type column */   
         val=tc.getParamValue(params, (tmt.cta?hdr.type.cta:(tmt.other?hdr.type.other:hdr.type.page)), true)||(tmt.cta?trs.cta:(tmt.other?trs.other:trs.page));
-        content+=tv.nodeHeaderCellType(tp.getTypeLabel(val), tr.cnType, (tc.lastParam.v?('['+tc.lastParam.p+'='+tc.lastParam.v+'] '):'')+trs.rowDoubleClick, 
-                                       null, tp.isTypeChart(val), (tp.getDataQuery(rq.url, tc.getUrlParser(rq.url), rq.tabUrl)?tp.getDataLink():''));
+        content+=tv.nodeHeaderCellType(tp.getTypeLabel(val), tr.cnType, (tc.lastParam.v?('['+tc.lastParam.p+'='+tc.lastParam.v+'] '):'')/*+trs.rowDoubleClick*/, 
+                                       null, tp.isTypeChart(val), tp.getDataLink(tp.getDataQuery(rq.url, tc.getUrlParser(rq.url), rq.tabUrl)));
                 
         /* Header row: space column (mandatory) */
         for (i=0,c=0;i<hdr.space.length;i++)
@@ -1109,7 +1145,14 @@ var tc=
         {
             icon.title=tps.title.rowcopy;
             icon.addEventListener('click', tc.onClickRowCopy);
-        }           
+        }  
+        /* Click on arrow icon listener */
+        arrow=node.querySelector('.arrow');
+        if (arrow)
+        {
+            arrow.title=trs.arrowClick;
+            arrow.addEventListener('click', tc.onClickArrow);
+        }                  
                 
         /* Details row **************************************************/
         
@@ -1180,6 +1223,7 @@ var tc=
         }    
         node=tv.nodeRowDetail(scontent, cn + " "+tr.cnInfo+" "+tr.cnAdvanced, (visible&&advanced&&scontent), !content);
         tr.dTags.appendChild(node);   
+        tc.setNodeArrow(arrow, (visible&&advanced&&scontent));
         
         /* All rows are created ******************************/
           

@@ -425,8 +425,12 @@ var tc=
     onClickArrow : function(e)
     {
 
-        var n=this.parentNode.parentNode;
-        if (n.tagName=='TR')
+        var n=this.parentNode;
+        while (n && n.tagName!=='TR')
+        {
+            n=n.parentNode;
+        }
+        if (n && n.tagName=='TR')
         {
             tc.toggleRow(n);     
         }  

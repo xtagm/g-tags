@@ -61,13 +61,15 @@ tv=
      */
     nodeHeaderCellType : function(content, className, title, display, icon, dlink)
     {
-        content=dlink?('<a target="_blank" class="dlink" href="'+dlink+'"'+'>'+content+'</a>'):content;
+        var ncontent='<div style="display:table;width:100%;"><div style="display:table-cell;">';
+        ncontent+='<span class="arrow aright"></span>';
+        ncontent+=(dlink?('<a target="_blank" class="dlink" href="'+dlink+'"'+'>'+content+'</a>'):content)+'</div>';
         if (icon)
         {
-            content+='<span'+tv.nodeAttr('class', 'cchart cicon cghost cright')+'></span>';
+            ncontent+='<span'+tv.nodeAttr('class', 'cchart cicon cghost')+' style="display:table-cell;text-align:right;"></span>';
         }
-        content='<span class="arrow aright"></span>'+content;
-        return tv.nodeHeaderCell(content, className, title, display);
+        ncontent+='</div>';
+        return tv.nodeHeaderCell(ncontent, className, title, display);
     },
     /**
      * Create a table header cell node for URL

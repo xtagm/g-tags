@@ -4,11 +4,13 @@ call C:\Utilw\closurecompiler.bat tc.js
 call C:\Utilw\closurecompiler.bat tr.js
 call C:\Utilw\closurecompiler.bat tm.js
 call C:\Utilw\closurecompiler.bat tv.js
+call C:\Utilw\closurecompiler.bat cc.js
 call C:\Utilw\closurecompiler.bat background.js
 cd wap
 call C:\Utilw\closurecompiler.bat bp.js
 call C:\Utilw\closurecompiler.bat tp.js
 call C:\Utilw\closurecompiler.bat ts.js
+call C:\Utilw\closurecompiler.bat cp.js
 rem cd..
 rem cd..
 rem echo Copy HTML & CSS to G-Tags

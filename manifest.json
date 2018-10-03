@@ -2,7 +2,7 @@
 	"name": "XTag Google Analytics: Record and check",
 	"short_name" : "XTag GA",
 	"manifest_version": 2,
-	"version": "7.4.0",
+	"version": "7.5.0",
 	"minimum_chrome_version":"44.0.2403",
 
 	"description": "Categorize, record and display Google Analytics tags, with parameters meaning.", 
@@ -31,10 +31,8 @@
 	},	
 
 	"permissions": ["storage","clipboardWrite","tabs","webRequest",
-	"*://*.google-analytics.com/__utm.gif*",
+	"*://*/__utm.gif*",
 	"*://*.google-analytics.com/r*",
-	"*://*.google-analytics.com/collect*",
-	"*://stats.g.doubleclick.net/__utm.gif*",
-	"*://stats.g.doubleclick.net/collect*",
+	"*://*/collect*",
 	"*://stats.g.doubleclick.net/r*"]
 }

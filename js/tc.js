@@ -228,11 +228,18 @@ var tc=
             if (isAdv || an[i].style.display===tv.vNone)
             {
                 nh=an[i].previousSibling;
-                if (nh.className.indexOf(tr.cnTag)<0)
+                if (nh)
                 {
-                    nh=nh.previousSibling;
+                    if (nh.className && nh.className.indexOf(tr.cnTag)<0)
+                    {
+                        nh=nh.previousSibling;
+                    }
+                    if (nh.className && nh.className.indexOf(tr.cnTag)>=0)
+                    {
+                        tc.setNodeArrow(nh.querySelector('.arrow'), an[i].style.display!==tv.vNone);  
+                    }              
                 }
-                tc.setNodeArrow(nh.querySelector('.arrow'), an[i].style.display!==tv.vNone);
+
             }
             if (visibleStyle===tv.vRow && an[i].className.indexOf(tr.cnInfo)<0)
             {
@@ -1013,7 +1020,7 @@ var tc=
         /* Mark request as done, store it, extract parameters, compute type and visibility */
         tc.rqdone[rq.requestId].done=true;
         index = tc.rqurl.push(rq.url)-1;
-        params=tc.getUrlParser(rq.url);
+        params=tc.getUrlParser(rq.url.replace(/&amp;/g, '&'));
         tp.setParams(rq, params);
         visible=((tmt.cta && tr.cCTA.checked) || (tmt.other && tr.cOther.checked) || (!tmt.cta && !tmt.other && tr.cPage.checked));
         

@@ -1,5 +1,5 @@
 /**
- * X-Tags settings and default labels
+ * XTag settings and default labels
  */
 /*jslint nomen: true*/
 var ts=
@@ -37,7 +37,7 @@ detail:
         val:{}
     },
     /** Recognized parameters: : [param, (ignored), value translation] */
-    other:[['utme'],['el'],['ev'],['pa'],['pr1id'],['pr1nm'],['pr1ca']]       
+    other:[['utme'],['el'],['ev'],['pa'],['cg1'],['pr1id'],['pr1nm'],['pr1ca']]       
 },
 
 /** Space dictionary */
@@ -69,7 +69,7 @@ av:'Application Version',
 cc:'Campaign Content',
 cd:'Screen Name',
 cd_:'Custom Dimension',
-cg_:'Custom Group',
+cg_:'Content Group',
 ci:'Campaign ID',
 cid:'Anonymous Client ID',
 ck:'Campaign Keyword',

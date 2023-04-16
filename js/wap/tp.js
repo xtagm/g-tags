@@ -136,6 +136,10 @@ var tp=
     getParamLabel : function(param)
     {
         var label=(ts.param[param]||param), an=[],pl=param, i=0;
+        if (param == "tt" && tm.lastver)
+        {
+            label = ts.param[param+"_GA4"] ;
+        }
         if (label===param)
         {
             an=param.match(/[0-9]+/g);
@@ -159,8 +163,53 @@ var tp=
                 }                
             }
         }
+        if (label == param)
+        {
+            var labelp = "", labeln = "" ;
+            if (param.indexOf("ep.") == 0)
+            {
+                labelp = "Event Parameter" ;
+                labeln =  param.substr(3) ;
+            }
+            else if (param.indexOf("epn.") == 0)
+            {
+                labelp = "Event Parameter Numeric" ;
+                labeln = param.substr(4) ;
+            }
+            else if (param.indexOf("up.") == 0)
+            {
+                labelp = "User Parameter" ;
+                labeln =  param.substr(3) ;
+            }
+            else if (param.indexOf("upn.") == 0)
+            {
+                labelp = "User Parameter Numeric" ;
+                labeln = param.substr(4) ;
+            }              
+            if (labelp.length > 0)
+            {
+                var nPos = labeln.indexOf(" ("), index = "" ;
+                if (nPos > 0)
+                {
+                    index = labeln.substr(nPos) ; 
+                    labeln = labeln.substr(0, nPos) ;
+                }
+                label = labelp + " [" + labeln + "]" + index ;
+            }          
+        }
         return tv.noBreak(label);         
-    },
+    },   
+    /**
+     * Retrieve specific parameter value
+     */    
+    getParamValue : function(param, value) 
+    {
+        if (param == "uafvl")
+        {
+            return decodeURIComponent(value) ;
+        }
+        return value ;
+    },  
     /**
      * Check credentials 
      */   

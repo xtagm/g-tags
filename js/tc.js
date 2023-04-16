@@ -1314,7 +1314,11 @@ var tc=
                     {
                         v=decodeURIComponent(v);
                     }
-                    catch (err2) {console.log('tc.addTag(..) Advanced:'+v+' '+err2.message);}                                                          
+                    catch (err2) {console.log('tc.addTag(..) Advanced:'+v+' '+err2.message);}  
+                    if (tp.getParamValue) 
+                    {
+                        v = tp.getParamValue(param, v) ;
+                    }                                                       
                     scontent+=tv.nodeParam(param, tc.getParamTip(param), v, (c===0||isBr));
                     isBr=false;
                     c++;

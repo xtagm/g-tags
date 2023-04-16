@@ -239,6 +239,7 @@ param:
     'tr':'Transaction Revenue',
     'ts':'Transaction Shipping',
     'tt':'Transaction Tax',
+    'tt_GA4':'Traffic Type',
     'ua':'User Agent override',
     'uaa':'User Agent Architecture',
     'uab':'User Agent Bitness',

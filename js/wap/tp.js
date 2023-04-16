@@ -198,11 +198,32 @@ var tp=
          return v;
      },
      /**
-      * Return a splitter string (will be treated as &)
+      * Return the mark of blocks section
       */
-     getUrlSplitter:function()
+     getBlockSectionMark:function()
      {
         return 'richsstsse?';
+     },
+     /**
+      * Return the mark of a new block
+      */
+     getBlockMark:function()
+     {
+        return /\r\n/g ;
+     },     
+     /**
+      * Return the param to be considered as a block begin
+      */
+     getBlockBeginParam :function()
+     {
+        return "en" ;
+     },
+     /**
+      * Return the value of this param to be considered as the first block
+      */
+     getBlockBeginParamValueFirst :function()
+     {
+        return "page_view" ;
      }
 };
 

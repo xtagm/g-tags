@@ -25,27 +25,93 @@ var tc=
      */
     getUrlParser : function(u)
     {
-        var params={}, delimiter='_additional_xtag_', additional = 0;
-        u = u.replace(tp.getUrlSplitter(), '');
-        u = u.replace(/\r\n/g, '&' + delimiter + '=0&');
+        var params={}, bmark='_additional_xtag_', additional = 0;
+        var ab1=[], ab2=[], lb = null, index = "" ;
+        var firstParam = tp.getBlockBeginParam? tp.getBlockBeginParam() : "" ;
+        var firstValue = tp.getBlockBeginParamValueFirst? tp.getBlockBeginParamValueFirst() : "" ;
+        var nFirstIndex = -1 ;
+        if (tp.getBlockSectionMark)
+        {
+            u = u.replace(tp.getBlockSectionMark(), '');
+        }
+        if (tp.getBlockMark)
+        {
+            u = u.replace(tp.getBlockMark(), '&' + bmark + '=0&');
+        }        
+        // Collect all parameters, added by blocks in a first array
         u.replace(new RegExp("([^?=&]+)(=([^&]*))?", "g"), function(b, a, d, c)
         {
             a=a.toLowerCase();
-            var p = a ;
-            if (a == delimiter)
+            if (a == bmark)
             {
-                additional++ ;
+                if (lb && Object.keys(lb).length > 0)
+                {
+                    ab1.push(lb);
+                }
+                lb = null ;
                 return ;
             }
-            if (additional > 0)
+            if (!lb || (firstParam.length > 0 && a == firstParam))
             {
-                p = a + " (" + additional.toString() + ")";
+                if (lb && Object.keys(lb).length > 0)
+                {
+                    ab1.push(lb);
+                }
+                lb = {};
             }
-            if (!params[p])
+            if (c)
             {
-                params[p] = c;
+                lb[a] = c;
             }
         });
+        if (lb && Object.keys(lb).length > 0)
+        {
+            ab1.push(lb);
+        }
+        // Try to find the block that must be considered as first
+        for (i=0;i<ab1.length && nFirstIndex < 0;i++)
+        {
+            if (i == 0)
+            {
+                ab2.push(ab1[i]);
+            }
+            else if (firstParam.length == 0)
+            {
+                break ;
+            }
+            else
+            {           
+                for (p in ab1[i])
+                {
+                    if (ab1[i].hasOwnProperty(p) && (p == firstParam && ab1[i][p] == firstValue))
+                    {
+                        ab2.push(ab1[i]);
+                        nFirstIndex = i ;
+                        break ;                      
+                    }
+                }
+            }
+        }
+        // Add additional blocks in final array
+        for (i=1;i<ab1.length;i++)
+        {
+            if (i !== nFirstIndex)
+            {
+                ab2.push(ab1[i]);
+            }
+        }  
+        // Iterate all blocks to add params in returned object, with an index for additional blocks
+        for (i=0;i<ab2.length;i++)
+        {
+            index = (i>1)? (" (" + (i-1).toString() + ")") : "";
+            for (p in ab2[i])
+            {
+                if (ab2[i].hasOwnProperty(p))
+                {
+                    params[p+index] = ab2[i][p] ;                        
+                }
+            }        
+        }             
         return params;
     },
     /**

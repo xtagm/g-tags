@@ -5,7 +5,7 @@
 var tps=
 {
     name:'XTag Google Analytics',
-    desc:'Tags recorder and interpreter',
+    desc:'UA & GA4 Tags Recorder and Interpreter',
     credentials:'You need valid Google credentials to display charts', 
     copiedData:'Query Explorer data copied',  
     /**
@@ -16,10 +16,12 @@ var tps=
         cta:"Show/Hide Event tags",
         other:"Show/Hide other tags (Display advertising, Timing, Transaction, Item, Custom...)",
         rowdata:"Copy data and open Query Explorer to import - Right Click to just copy",
-        rowcopy:"Copy this tag"        
+        rowcopy:"Copy this tag",
+        lastver:"Show GA4 tags only / UA & GA4 tags"       
     },
     clabel:{
-        cta:"Events"
+        cta:"Events",
+        lastver:"GA4 only"
     }         
 };
 /**
@@ -29,6 +31,8 @@ var tp=
 {
     urls:["*://*.google-analytics.com/__utm.gif*","*://*.google-analytics.com/r*",
     "*://*.google-analytics.com/collect*",
+	"*://*/j/collect*",
+	"*://*/g/collect*",
     "*://stats.g.doubleclick.net/__utm.gif*", 
     "*://stats.g.doubleclick.net/collect*",
     "*://stats.g.doubleclick.net/r*"],
@@ -69,9 +73,10 @@ var tp=
     setParams : function(rq, params)
     {
         tm.type.params=params;
-        tm.type.cta=((params.t==='event')||(params.utmt==='event')); 
-        tm.type.other=(!tm.type.cta&&((params.t && params.t!=='pageview')||(params.utmt && params.utmt!=='page')));  
-        tm.type.ua=params.tid?true:false;              
+        tm.type.cta=((params.t==='event')||(params.utmt==='event'))||(params.en && params.en!=='page_view'); 
+        tm.type.other=(!tm.type.cta&&((params.t && params.t!=='pageview')||(params.utmt && params.utmt!=='page'))) || (rq.url && rq.url.indexOf('stats.g.doubleclick.net') > 0);  
+        tm.type.ua=params.tid?true:false; 
+        tm.lastver = params.tid && (params.tid.indexOf("G-") == 0);          
     },
     /**
      * Test if a parameter is a custom variable
@@ -191,40 +196,17 @@ var tp=
      {
          v='';
          return v;
+     },
+     /**
+      * Return a splitter string (will be treated as &)
+      */
+     getUrlSplitter:function()
+     {
+        return 'richsstsse?';
      }
 };
 
 var tpse=
 {
-    'UA-8189219-1':'Hub Resource Advisor',  
-    'UA-8189219-4':'SE United Arab Emirates',  
-    'UA-8189219-5':'SE Korea',  
-    'UA-8189219-6':'Preview - SE United Kingdom',  
-    'UA-8189219-8':'SE Corporate',   
-    'UA-8189219-9':'SE Spain',  
-    'UA-8189219-10':'SE Russia',  
-    'UA-8189219-11':'Preview - SE Corporate',  
-    'UA-8189219-12':'Preview - SE Russia',  
-    'UA-8189219-13':'Preview - SE Spain',  
-    'UA-8189219-14':'Preview - SE United States',  
-    'UA-8189219-15':'Preview - Energy University',  
-    'UA-8189219-16':'SE South Africa',  
-    'UA-8189219-17':'Preview - SE South Africa',  
-    'UA-8189219-18':'SE India',  
-    'UA-8189219-19':'Preview - SE India',  
-    'UA-8189219-20':'SE Greece',  
-    'UA-8189219-21':'SE Brazil',  
-    'UA-8189219-22':'SE Indonesia - EN',  
-    'UA-8189219-23':'SE Sweden',  
-    'UA-8189219-24':'SE Turkey',  
-    'UA-8189219-25':'SE France',  
-    'UA-8189219-26':'SE Poland',  
-    'UA-8189219-27':'SE China CN',
-    'UA-8189219-28':'SE China EN',
-    'UA-8189219-29':'SE Indonesia - ID',
-    'UA-7637623-2': 'SE United States',
-    'UA-46644293-1': 'APC',
-    'UA-46644293-6': 'APC (Test)',
-    'UA-2449534-1': 'SE United Kingdom',
-    'UA-60277833-1': 'SE Norway'
+    'UA-000000-1':'Dummy example'  
 };

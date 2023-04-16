@@ -91,14 +91,14 @@ a {color:#888;}
     width: 11px;
     height: 11px;
     border-radius: 50%;
-    box-shadow: #000 0 -1px 6px 1px, inset #730909 0 -1px 8px;
+	box-shadow: #094273 0 0px 4px 0px, inset #81614e 0 -1px 6px;
     background-color: rgba(255, 255, 255, 0.25);
     cursor:pointer;
 	transition: all 0.5s ease;      
 } 
 /* Led on */ 		
 .active {
-	box-shadow: #000 0 -1px 6px 1px, inset #6b0303 0 -1px 8px, #F00 0 0 9px 2px;
+	/*box-shadow: #000 0 -1px 6px 1px, inset #F05620 0 -1px 8px, #F00 0 0 9px 2px;*/
 	background-color: #F00;
 }
 /* Checkbox */
@@ -147,7 +147,7 @@ input[type=checkbox]:checked + label:before {content: "\f046";}
 
 
 
-.cenable {color:#efef0d !important;}
+.cenable {color:#ff6d00 !important;}
 .cenable:hover {color:#efef0d !important;}
 
 .cghost 
@@ -190,16 +190,16 @@ input[type=checkbox]:checked + label:before {content: "\f046";}
 	white-space:nowrap; 
 }
 .typepage {
-	color: #275420;
-	background: #DFFFDE;
+	color: #202124;
+	background: #E8EAED;
 }
 .typecta {
-	color: #00557F;
-	background: #E1EEf4;
+	color: #070ed3;
+	background: #E8F0FE;
 }
 .typeother {
-	color: #7F4614;
-	background: #F0E5CC;
+	color: #66127a;
+    background: #E8E8FF;
 }
 .tagspace {
 	white-space:nowrap;
@@ -237,7 +237,7 @@ tr.info.detail {
 	background: white
 }
 tr.info.advanced {
-	background: #f5f5f5;
+	background: #f8f8f8;
 	font-style:italic;
 }
 td {

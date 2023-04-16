@@ -7,7 +7,7 @@ var trs=
     c:'en',
     
     page:"Page",
-    cta:"CTA",
+    cta:"Event",
     other:"Other",
        
     stop:"Stop recording",
@@ -29,7 +29,8 @@ var trs=
         other:"Show/Hide other tags",
         url:"Show/Hide URL",
         details:"Show/Hide main details",
-        advanced:"Show/Hide all tag parameters",    
+        advanced:"Show/Hide all tag parameters",  
+        lastver:"Show only last version tags/All tags",  
         clear:"Clear all recorded tags",
         copy:"Copy all displayed tags",
         chevron:"Collapse control bar",
@@ -82,6 +83,7 @@ var tr=
     cnReduced:"reduced",
     cnView:"view",
     cnDLink:"dlink",
+    cnLastver:"taglastver",
     
 
     acbx:[],
@@ -92,7 +94,7 @@ var tr=
     {
         /* Nodes */
         var i=0, node=null, id='',title='';
-        an=['cPage','cCTA','cOther','cUrl','cDetails','cAdvanced','bList','bView','bRaise','bChart','bUser','bChevron','bCopy','bBook','bClear','bApply','dRecord','dBar','dTags','dContent','dMsg',
+        an=['cPage','cCTA','cOther','cUrl','cDetails','cAdvanced','cLastver','bList','bView','bRaise','bChart','bUser','bChevron','bCopy','bBook','bClear','bApply','dRecord','dBar','dTags','dContent','dMsg',
             'dHelp','dUserContent','fUserForm','tEmail','tPwd','sPeriod'];
         for (i=0;i<an.length;i++)
         {

@@ -51,11 +51,11 @@
 	position : absolute;
 	border : 1px solid #a2a2a2;  
 	border-radius:3px;            
-	z-index : 20000;
+	z-index : 100000;
 }
 .xtm-chart {
 	position : fixed;
-	z-index : 30000;
+	z-index : 200000;
 	pointer-events:none;
 	background-color:#FFF;
 	padding:2px 2px;
@@ -65,7 +65,7 @@
 }   
 .xtm-pinchart {
     position : absolute;
-    z-index : 25000;            
+    z-index : 150000;            
     background-color:#FFF;
     border : 1px solid #a2a2a2;
     border-radius:3px; 
@@ -80,7 +80,7 @@
     padding:2px 4px;
     margin-top:1px;
     border-radius:3px;
-    z-index : 30000;
+    z-index : 200000;
     transition:opacity .6s;
     opacity:0;
     font-family:Arial,sans-serif;

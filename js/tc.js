@@ -25,13 +25,25 @@ var tc=
      */
     getUrlParser : function(u)
     {
-        var params={};
+        var params={}, delimiter='_additional_xtag_', additional = 0;
+        u = u.replace(tp.getUrlSplitter(), '');
+        u = u.replace(/\r\n/g, '&' + delimiter + '=0&');
         u.replace(new RegExp("([^?=&]+)(=([^&]*))?", "g"), function(b, a, d, c)
         {
             a=a.toLowerCase();
-            if (!params[a])
+            var p = a ;
+            if (a == delimiter)
             {
-                params[a] = c;
+                additional++ ;
+                return ;
+            }
+            if (additional > 0)
+            {
+                p = a + " (" + additional.toString() + ")";
+            }
+            if (!params[p])
+            {
+                params[p] = c;
             }
         });
         return params;
@@ -219,12 +231,13 @@ var tc=
     /**
      * Checkbox actions
      */
-    allCheckChanged : function(cbx,selector,visibleStyle,emptyVisible)
+    allCheckChanged : function(cbx,selector,visibleStyle,emptyVisible,invert)
     {
-        var an=document.querySelectorAll(selector), i=0, v=(cbx.checked?'1':'0'),nh=null, isAdv=(selector.indexOf(tr.cnAdvanced)>=0);
+        var checked = invert? !cbx.checked : cbx.checked;
+        var an=document.querySelectorAll(selector), i=0, v=(checked?'1':'0'),nh=null, isAdv=(selector.indexOf(tr.cnAdvanced)>=0);
         for (i=0;i<an.length;i++)
         {
-            an[i].style.display=(cbx.checked&&(emptyVisible||an[i].textContent.replace(/(^\s*)/g, "")))?(visibleStyle||"block"):tv.vNone;
+            an[i].style.display=(checked&&(emptyVisible||an[i].textContent.replace(/(^\s*)/g, "")))?(visibleStyle||"block"):tv.vNone;
             if (isAdv || an[i].style.display===tv.vNone)
             {
                 nh=an[i].previousSibling;
@@ -243,10 +256,10 @@ var tc=
             }
             if (visibleStyle===tv.vRow && an[i].className.indexOf(tr.cnInfo)<0)
             {
-                tc.toggleRow(an[i],cbx.checked);
+                tc.toggleRow(an[i],checked);
             }
         }
-        tc.state.checks[cbx.id]=v;
+        tc.state.checks[cbx.id]=(cbx.checked?'1':'0');
         tm.persist.set({'statechecks':tc.state.checks});
     },    
     typeCheckChanged : function(cbx, type)
@@ -279,7 +292,12 @@ var tc=
     },
     /**
      * Checkbox events
-     */     
+     */    
+    onCheckLastver : function()
+    {
+        tc.allCheckChanged(this, '.'+tr.cnTag+':not(.'+tr.cnLastver+')', tv.vRow, false, true);
+ 
+    },
     onCheckPage : function()
     {
         tc.typeCheckChanged(this, tr.cnPage);
@@ -532,6 +550,7 @@ var tc=
         /*
          * Filters clicks
          */
+        tr.cLastver.onchange = tc.onCheckLastver;
         tr.cPage.onchange = tc.onCheckPage;
         tr.cCTA.onchange = tc.onCheckCTA;
         tr.cOther.onchange = tc.onCheckOther;
@@ -1013,7 +1032,7 @@ var tc=
     {       
         var node=null, icon=null, arrow=null, content='', i=0, c=0, cs=1, v='',param=null, params=null,isBr=true, ah=[], ap=[], scontent='',cn='',
         date=new Date(rq.timeStamp), index = 0, cmin=1,
-        hdr=ts.header, tmt=tm.type,
+        hdr=ts.header, tmt=tm.type, cnLastver = '',
         visible=true, translate=false, ptrans=false,
         withUrl= tr.cUrl.checked, infos= tr.cDetails.checked, advanced=false, label='', tip='', val='', pv='';
         
@@ -1022,7 +1041,11 @@ var tc=
         index = tc.rqurl.push(rq.url)-1;
         params=tc.getUrlParser(rq.url.replace(/&amp;/g, '&'));
         tp.setParams(rq, params);
-        visible=((tmt.cta && tr.cCTA.checked) || (tmt.other && tr.cOther.checked) || (!tmt.cta && !tmt.other && tr.cPage.checked));
+        if (tm.lastver)
+        {
+            cnLastver = " " + tr.cnLastver ;
+        }
+        visible=((tmt.cta && tr.cCTA.checked) || (tmt.other && tr.cOther.checked) || (!tmt.cta && !tmt.other && tr.cPage.checked)) && (!tr.cLastver || !tr.cLastver.checked || tm.lastver);
         
         tc.detailsCheckChanged(infos);
         advanced= tr.cAdvanced.checked;    
@@ -1132,7 +1155,7 @@ var tc=
         
         /* Header row node creation */
         cn=(tmt.cta?tr.cnCTA:(tmt.other?tr.cnOther:tr.cnPage));
-        node=tv.nodeRow(content, tr.cnTag+' '+cn, visible, index);
+        node=tv.nodeRow(content, tr.cnTag+' '+cn+cnLastver, visible, index);
         tr.dTags.appendChild(node);
         /* Double click listener */
         node.addEventListener('dblclick', tc.onDoubleClickTag);
@@ -1207,7 +1230,7 @@ var tc=
                 c++;
             }
         } 
-        node=tv.nodeRowDetail(content, cn+" "+tr.cnInfo+" "+tr.cnDetail, (visible&&infos&&content), true);
+        node=tv.nodeRowDetail(content, cn+" "+tr.cnInfo+" "+tr.cnDetail+cnLastver, (visible&&infos&&content), true);
         tr.dTags.appendChild(node);     
               
         /* Advanced row **************************************************/     
@@ -1232,7 +1255,7 @@ var tc=
                 }                    
             }
         }    
-        node=tv.nodeRowDetail(scontent, cn + " "+tr.cnInfo+" "+tr.cnAdvanced, (visible&&advanced&&scontent), !content);
+        node=tv.nodeRowDetail(scontent, cn + " "+tr.cnInfo+" "+tr.cnAdvanced+cnLastver, (visible&&advanced&&scontent), !content);
         tr.dTags.appendChild(node);   
         tc.setNodeArrow(arrow, (visible&&advanced&&scontent));
         
@@ -1287,16 +1310,19 @@ var tc=
     {
         if (details.method==='POST' && tc.record)
         {
-            var ad=details.requestBody.raw, p='', rq=details;
-            if (ad.length>0)
-            {
-                p=new TextDecoder("utf-8").decode(ad[0].bytes);
-                if (p)
-                {
-                    rq.url+="?"+p;
-                    tm.wx.tabs.get(rq.tabId,function(Tab){tc.addRequest(rq, Tab.url);});
-                }
-            }
+			if (details.requestBody.raw !== undefined)
+			{
+				var ad=details.requestBody.raw, p='', rq=details;
+				if (ad.length>0)
+				{
+					p=new TextDecoder("utf-8").decode(ad[0].bytes);
+					if (p)
+					{
+						rq.url+="?"+p;
+						tm.wx.tabs.get(rq.tabId,function(Tab){tc.addRequest(rq, Tab.url);});
+					}
+				}
+			}
         }
     },
     onSendHeaders : function(rq)
@@ -1332,7 +1358,7 @@ var tc=
             if (sRq && !sRq.done)
             {
                 /* Add tag when statusCode is success or redirected */
-                if (rq.statusCode===200 || rq.statusCode===302)
+                if (rq.statusCode===200 || rq.statusCode===204 || rq.statusCode===302)
                 {
 					tc.addTag(sRq);
                 }

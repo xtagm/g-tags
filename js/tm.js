@@ -8,6 +8,7 @@ var tm=
     cache:{},
     spaces:{},
     last:'',
+    lastver:false,
     type:
     {
         cta:false,

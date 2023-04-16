@@ -46,11 +46,19 @@ var bm=
     },   
     isTabValid : function(tab)
     {
-        return (tab.url.indexOf("https://chrome.google.com") !== 0 && tab.url.indexOf("chrome://") !== 0  && tab.url.indexOf("chrome-extension://") !== 0);
+        if (tab.url !== undefined)
+		{		
+			return (tab.url.indexOf("https://chrome.google.com") !== 0 && tab.url.indexOf("chrome://") !== 0  && tab.url.indexOf("chrome-extension://") !== 0);
+		}
+		return false ;
     },   
     isTabChild : function(tab)
     {
-        return (tab.url.indexOf(wx.runtime.id)>0);
+        if (tab.url !== undefined && wx.runtime.id !== undefined)
+		{
+			return (tab.url.indexOf(wx.runtime.id)>0);
+		}
+		return false ;
     },
     /**
      * Reset Control
@@ -442,10 +450,13 @@ wx.windows.onFocusChanged.addListener(function(windowId)
         {    
             wx.tabs.getSelected(windowId, function(tab)
             {
-                if (tab.id!==bm.tabid)
-                {
-                    bm.onTabChanged(tab.id);
-                }
+				if (tab !== undefined)
+				{
+					if (tab.id!==bm.tabid)
+					{
+						bm.onTabChanged(tab.id);
+					}
+				}
             }); 
         }
    }    

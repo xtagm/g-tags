@@ -1,0 +1,5 @@
+*.zip
+js/ccomp/
+js/wap/ccomp/
+js/backup/
+/nbproject/private/

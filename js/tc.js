@@ -896,7 +896,7 @@ var tc=
     showMsgTag : function(node, msg, rnode, fnEnd)
     {
         tr.dMsg.innerHTML=msg;
-        var rc = node.getBoundingClientRect(), rcm=tr.dMsg.getBoundingClientRect(), delay=1500, 
+        var rc = node.getBoundingClientRect(), rcm=tr.dMsg.getBoundingClientRect(), delay=2000, 
         x1=rc.right - rcm.right + rcm.left -1, x2=rnode?rnode.getBoundingClientRect().right+4:x1;
         tr.dMsg.style.top = rc.top.toString() + "px";
         tr.dMsg.style.left = (Math.min(x1,x2)).toString() + "px";              
@@ -914,10 +914,10 @@ var tc=
         tr.dMsg.style.visibility="hidden";
         tr.dMsg.innerHTML='';
     }, 
-    showMsgBar : function(msg, fnEnd, noHide)
+    showMsgBar : function(msg, fnEnd, noHide, myDelay)
     {
         tr.dHelp.innerHTML=msg;
-        var rc = tr.bUser?tr.bUser.getBoundingClientRect():tr.cAdvanced.parentNode.getBoundingClientRect(), delay=2500; 
+        var rc = tr.bUser?tr.bUser.getBoundingClientRect():tr.cAdvanced.parentNode.getBoundingClientRect(), delay=(myDelay || 3000); 
         tr.dHelp.style.top = "0px";
         tr.dHelp.style.left = (rc.right+8).toString() + "px";              
         tr.dHelp.style.visibility="visible";
@@ -1457,7 +1457,7 @@ var tc=
                 chrome.runtime.sendMessage({type:'bm_copy', text:reason+'\t'+rq.url+'\r\n'});
                 tm.wx.runtime.sendMessage({type:'bm_newtag'});
                 tm.wx.runtime.sendMessage({type:'bm_focus'});
-                tc.showMsgBar(trs.badRequest);
+                tc.showMsgBar((reason && reason.indexOf("net::ERR_BLOCKED_BY_CLIENT")==0)? trs.blockedRequest : trs.badRequest, null, false, 4500);
             }
         }          
     },    

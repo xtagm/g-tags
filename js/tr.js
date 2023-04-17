@@ -15,6 +15,7 @@ var trs=
     copyDone:'# tags have been copied in the clipboard, you can paste in Excel.',
     copyDoneOne:'1 tag has been copied in the clipboard, you can paste in Excel.',
     badRequest:'Failed tag request copied in the clipboard (not recorded)',
+    blockedRequest:'Tag request blocked, probably by an AdBlocker, copied in the clipboard (not recorded)',
     expand:"Click to expand control bar",
     rowDoubleClick:"Double click to show/hide all tag parameters",
     arrowClick:"Show/hide all tag parameters",

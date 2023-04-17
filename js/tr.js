@@ -84,7 +84,7 @@ var tr=
     cnReduced:"reduced",
     cnView:"view",
     cnDLink:"dlink",
-    cnLastver:"taglastver",
+    cnLegacy:"tagLegacy",
     
 
     acbx:[],

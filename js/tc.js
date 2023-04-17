@@ -356,30 +356,51 @@ var tc=
         }
         cbx.disabled=!checked; 
     },
+    getLastverSelector : function()
+    {
+        return ':not(.'+tr.cnLegacy+')' ;
+    },
+    getLastverSelectorFromState : function()
+    {
+        return (tr.cLastver && tr.cLastver.checked)? tc.getLastverSelector(): '' ;
+    },    
     /**
      * Checkbox events
      */    
     onCheckLastver : function()
     {
-        tc.allCheckChanged(this, '.'+tr.cnTag+':not(.'+tr.cnLastver+')', tv.vRow, false, true);
- 
+        var legacySelect = '.'+tr.cnLegacy ;
+        // Hide / Show legacy tags
+        tc.allCheckChanged(this, '.'+tr.cnTag+legacySelect, tv.vRow, false, true);
+        // At this point, if unchecked, all legacy tags have been displayed: current filters must be re-applied
+        if (!this.checked)
+        {
+            if (!tr.cPage.checked)
+            {
+                tc.typeCheckChanged(tr.cPage, tr.cnPage+legacySelect);
+            }
+            if (!tr.cCTA.checked)
+            {
+                tc.typeCheckChanged(tr.cCTA, tr.cnCTA+legacySelect);
+            }
+            if (!tr.cOther.checked)
+            {
+                tc.typeCheckChanged(tr.cOther, tr.cnOther+legacySelect);
+            }
+        }
     },
     onCheckPage : function()
     {
-        tc.typeCheckChanged(this, tr.cnPage);
+        tc.typeCheckChanged(this, tr.cnPage+tc.getLastverSelectorFromState());
     },
     onCheckCTA: function(e)
-    {
-        tc.typeCheckChanged(this, tr.cnCTA);
+    { 
+        tc.typeCheckChanged(this, tr.cnCTA+tc.getLastverSelectorFromState());
     },    
     onCheckOther: function(e)
-    {
-        tc.typeCheckChanged(this, tr.cnOther);
+    {             
+        tc.typeCheckChanged(this, tr.cnOther+tc.getLastverSelectorFromState());
     },     
-    onCheckUrl: function(e)
-    {
-        tc.allCheckChanged(this, '.'+tr.cnUrl, tv.vCell, true);
-    },   
     onCheckDetails: function(e)
     {
         tc.infosCheckChanged(this,(this.checked?('.'+tr.cnInfo+'.'+tr.cnDetail):('.'+tr.cnInfo)));
@@ -389,6 +410,10 @@ var tc=
     {
         tc.infosCheckChanged(this,'.'+tr.cnInfo+'.'+tr.cnAdvanced);
     }, 
+    onCheckUrl: function(e)
+    {
+        tc.allCheckChanged(this, '.'+tr.cnUrl, tv.vCell, true);
+    },       
     /**
      * Click on Raise
      */
@@ -1098,7 +1123,7 @@ var tc=
     {       
         var node=null, icon=null, arrow=null, content='', i=0, c=0, cs=1, v='',param=null, params=null,isBr=true, ah=[], ap=[], scontent='',cn='',
         date=new Date(rq.timeStamp), index = 0, cmin=1,
-        hdr=ts.header, tmt=tm.type, cnLastver = '',
+        hdr=ts.header, tmt=tm.type, cnLegacy = '',
         visible=true, translate=false, ptrans=false,
         withUrl= tr.cUrl.checked, infos= tr.cDetails.checked, advanced=false, label='', tip='', val='', pv='';
         
@@ -1107,9 +1132,9 @@ var tc=
         index = tc.rqurl.push(rq.url)-1;
         params=tc.getUrlParser(rq.url.replace(/&amp;/g, '&'));
         tp.setParams(rq, params);
-        if (tm.lastver)
+        if (!tm.lastver)
         {
-            cnLastver = " " + tr.cnLastver ;
+            cnLegacy = " " + tr.cnLegacy ;
         }
         visible=((tmt.cta && tr.cCTA.checked) || (tmt.other && tr.cOther.checked) || (!tmt.cta && !tmt.other && tr.cPage.checked)) && (!tr.cLastver || !tr.cLastver.checked || tm.lastver);
         
@@ -1221,7 +1246,7 @@ var tc=
         
         /* Header row node creation */
         cn=(tmt.cta?tr.cnCTA:(tmt.other?tr.cnOther:tr.cnPage));
-        node=tv.nodeRow(content, tr.cnTag+' '+cn+cnLastver, visible, index);
+        node=tv.nodeRow(content, tr.cnTag+' '+cn+cnLegacy, visible, index);
         tr.dTags.appendChild(node);
         /* Double click listener */
         node.addEventListener('dblclick', tc.onDoubleClickTag);
@@ -1296,7 +1321,7 @@ var tc=
                 c++;
             }
         } 
-        node=tv.nodeRowDetail(content, cn+" "+tr.cnInfo+" "+tr.cnDetail+cnLastver, (visible&&infos&&content), true);
+        node=tv.nodeRowDetail(content, cn+" "+tr.cnInfo+" "+tr.cnDetail, (visible&&infos&&content), true);
         tr.dTags.appendChild(node);     
               
         /* Advanced row **************************************************/     
@@ -1325,7 +1350,7 @@ var tc=
                 }                    
             }
         }    
-        node=tv.nodeRowDetail(scontent, cn + " "+tr.cnInfo+" "+tr.cnAdvanced+cnLastver, (visible&&advanced&&scontent), !content);
+        node=tv.nodeRowDetail(scontent, cn + " "+tr.cnInfo+" "+tr.cnAdvanced, (visible&&advanced&&scontent), !content);
         tr.dTags.appendChild(node);   
         tc.setNodeArrow(arrow, (visible&&advanced&&scontent));
         

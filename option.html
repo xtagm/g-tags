@@ -20,38 +20,54 @@
 
 	<body>
 		<div id="header" style=";">
-			<h2>XTag for Google Analytics | Record and check Google Analytic tags</h2>
+			<h2>XTag for Google Analytics | Record and check UA &amp; GA4 tags</h2>
 		</div>
 		<div align="center" style="padding-top:25px;padding-left:10px;">
 			<table width=100% border="0">
 				<tr>
 					<td>
-					<p><i>Works with Chrome v44 and further.</i></p>
-					<h4>How to use :</h4>					
+					<p><i>Works with any Chromium engine (Chrome, Edge, Brave...) v44 and further.</i></p>
+					<h4>Extension icon :</h4>					
 					<ul>
 						<li>
-							Click on grayed icon: XTag GA window is displayed, icon is highlighted, tags recording begins.
+							Click on grayed icon: extension window is displayed, icon is highlighted, tags recording begins, just navigate any website with GA tracking.
+							<br><u>Note:</u> if there's some Adblocker extension preventing tag firing from the website, GA tag won't be recorded nor displayed but you'll be warned it has been copied in the clipboard.
 						</li>
 						<li>
-							Click on highlighted icon to display XTag GA when overlapped or minimized.
-						</li>								
+							Click on highlighted icon to display extension window when overlapped or minimized.
+						</li>	
+						<li>
+							Close extension window: icon is grayed, tags recording ends.
+						</li>
+					</ul>
+					<h4>Extension window :</h4>	
+					<ul>	
+						<li>
+							Click on orange led to stop/resume recording.			
+						</li>
+						<li>
+							Click on bolt icon to stop/allow extension window raising when a tag is recorded.			
+						</li>	
+						<li>
+							Check <b>GA4 only</b> to display only GA4 tags (UA tags are still recorded, so they will be displayed when unchecked).			
+						</li>																															
 						<li>
 							Uncheck <b>Pages</b> or <b>Events</b> or <b>Others</b> to hide them (they are still recorded, so they will be displayed when checked again).				
 						</li>
 						<li>
-							Check <b>Page URL</b> to see URL that triggered Page tag.		
+							Check <b>Page URL</b> to see the URL that triggered the tag.		
 						</li>						
 						<li>
-							Check <b>Details</b> and <b>Advanced</b> to see more data for all tags, or select a tag and double click.				
+							Check <b>Details</b> to see a selection of data.				
 						</li>
 						<li>
-							Click on orange led to stop/resume recording.			
-						</li>	
+							Check <b>Advanced</b> to see all data.				
+						</li>
 						<li>
 							Click on chevron to collapse control bar (or double click anywhere on it), click on collapsed bar to expand it.			
 						</li>
 						<li>
-							Double-click on tag type to show/hide all its details.	
+							Double-click on tag type or click on its arrow to show/hide all its details.	
 						</li>
 						<li>
 							Right-click on tag values to copy them.	
@@ -67,24 +83,15 @@
 						</li>																						
 						<li>
 							Click on trash icon to remove all recorded tags.			
-						</li>	
-						<li>
-							Click on eye icon to spy CTA setup with XTagManager or Schneider Electric Tag Manager (Event Category, Action, Label  and Value)			
-						</li>	
-						<li>
-							Click on double tags icon to extract and copy the list of all CTAs setup with XTagManager or Schneider Electric Tag Manager			
-						</li>	
-						<li>
-							Close XTag GA window: icon is grayed, tags recording ends.
 						</li>						
 					</ul>
 					<h4>Privacy :</h4>
 						<ul>
 							<li>
-								XTag Google Analytics doesn't transmit any of your private data and will never do it.
+								XTag Google Analytics doesn't transmit any data and will never do it.
 							</li>
 						</ul>
-					<h4>How to uninstall :</h4>
+					<h4>Uninstall :</h4>
 					<ol>
 						<li>
 							Right click on XTag Google Analytics icon.
@@ -96,55 +103,52 @@
 							Click on <b>Remove</b> button.
 						</li>						
 					</ol>
-					<h4>Changelog:</h4>
+					<h4>Changelog :</h4>
 					<ul>
                        <li>				
-					    <strong>8.1</strong>: 15/04/2023 - GA4 tracking completion.
+					    <b>8.1</b>: 17/04/2023 - Add <b>GA4 only</b> filter - Complements in parameters interpreter - Prioritization of <i>page_view</i> in GA4 requests with multiple events - AdBlocker detection &amp; warning.
    				       </li>						
                        <li>				
-					    <strong>8.0</strong>: 13/04/2023 - Add <strong>GA4</strong> tracking.
+					    <b>8.0</b>: 13/04/2023 - Add <b>GA4</b> tracking.
+   				       </li>												
+                       <li>				
+					    <b>7.4</b>: 23/06/2018 - Rotating arrow to command and visualize tag expand.
    				       </li>						
                        <li>				
-					    <strong>7.5</strong>: 22/07/2018 - CTA Spy and CTA List (with XTagManager or Schneider Electric Tag Manager).
-   				       </li>						
-                       <li>				
-					    <strong>7.4</strong>: 23/06/2018 - Rotating arrow to command and visualize tag expand.
-   				       </li>						
-                       <li>				
-					    <strong>7.3</strong>: 21/06/2018 - Detect, decode and log POST requests.
+					    <b>7.3</b>: 21/06/2018 - Detect, decode and log POST requests.
    				       </li>					
                        <li>				
-					    <strong>7.1</strong>: 10/04/2018 - Bolt icon to control window raising.
+					    <b>7.1</b>: 10/04/2018 - Bolt icon to control window raising.
    				       </li>					
                        <li>				
-					    <strong>7.0</strong>: 02/04/2018 - New branding. Individual tag copy.
+					    <b>7.0</b>: 02/04/2018 - New branding. Individual tag copy.
    				       </li>							
                        <li>				
-					    <strong>6.0</strong>: 04/03/2018 - Update with common tags tracker engine. Minor bugs fixes.
+					    <b>6.0</b>: 04/03/2018 - Update with common tags tracker engine. Minor bugs fixes.
    				       </li>						
                        <li>				
-					    <strong>2.3</strong>: 01/02/2018 - Display Event category, action and label on header line. Minor improvements.
+					    <b>2.3</b>: 01/02/2018 - Display Event category, action and label on header line. Minor improvements.
    				       </li>							
                        <li>				
-					    <strong>2.2</strong>: 22/09/2017 - Enrich Tag type tip with used parameter. Minor fixes and improvements. Recognize SE properties.
+					    <b>2.2</b>: 22/09/2017 - Enrich Tag type tip with used parameter. Minor fixes and improvements. Recognize SE properties.
    				      </li>							
                        <li>				
-					    <strong>2.1</strong>: 21/09/2017 - Minor bugs fixes.
+					    <b>2.1</b>: 21/09/2017 - Minor bugs fixes.
    				      </li>							
                        <li>				
-					    <strong>2.0</strong>: 20/09/2017 - New look  &amp; feel - Automatic copy on double clik - Clear all with right double click.
+					    <b>2.0</b>: 20/09/2017 - New look  &amp; feel - Automatic copy on double clik - Clear all with right double click.
    				      </li>							
                         <li>				
-					    <strong>1.3</strong>: 16/02/2017 - Minor presentation corrections.
+					    <b>1.3</b>: 16/02/2017 - Minor presentation corrections.
    				      </li>		                        
    				      <li>				
-					    <strong>1.2</strong>: 13/02/2017 - Parameters meaning completion.
+					    <b>1.2</b>: 13/02/2017 - Parameters meaning completion.
    				      </li>							
                         <li>				
-					    <strong>1.1</strong>: 13/02/2017 - Default checks changed.
+					    <b>1.1</b>: 13/02/2017 - Default checks changed.
    				      </li>									
                         <li>				
-					    <strong>1.0</strong>: 12/02/2017 - Initial version.
+					    <b>1.0</b>: 12/02/2017 - Initial version.
    				      </li>
 					 
 

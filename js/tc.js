@@ -336,15 +336,15 @@ var tc=
     {
         if (tr.cPage.checked)
         {
-            tc.allCheckChanged(cbx, '.'+tr.cnPage+root, tv.vRow);        
+            tc.allCheckChanged(cbx, '.'+tr.cnPage+tc.getLastverSelectorFromState()+root, tv.vRow);        
         }
         if (tr.cCTA.checked)
         {
-            tc.allCheckChanged(cbx, '.'+tr.cnCTA+root, tv.vRow);        
+            tc.allCheckChanged(cbx, '.'+tr.cnCTA+tc.getLastverSelectorFromState()+root, tv.vRow);        
         }
         if (tr.cOther.checked)
         {
-            tc.allCheckChanged(cbx, '.'+tr.cnOther+root, tv.vRow);        
+            tc.allCheckChanged(cbx, '.'+tr.cnOther+tc.getLastverSelectorFromState()+root, tv.vRow);        
         }           
     },  
     detailsCheckChanged : function(checked)
@@ -373,7 +373,14 @@ var tc=
         // Hide / Show legacy tags
         tc.allCheckChanged(this, '.'+tr.cnTag+legacySelect, tv.vRow, false, true);
         // At this point, if unchecked, all legacy tags have been displayed: current filters must be re-applied
-        if (!this.checked)
+        if (this.checked)
+        {
+            if (!tr.cAdvanced.checked)
+            {
+                tc.onCheckAdvanced();
+            } 
+        }
+        else
         {
             if (!tr.cPage.checked)
             {
@@ -387,32 +394,36 @@ var tc=
             {
                 tc.typeCheckChanged(tr.cOther, tr.cnOther+legacySelect);
             }
-        }
+            if (tr.cAdvanced.checked)
+            {
+                tc.onCheckAdvanced();
+            }    
+        } 
     },
     onCheckPage : function()
     {
-        tc.typeCheckChanged(this, tr.cnPage+tc.getLastverSelectorFromState());
+        tc.typeCheckChanged(tr.cPage, tr.cnPage+tc.getLastverSelectorFromState());
     },
     onCheckCTA: function(e)
     { 
-        tc.typeCheckChanged(this, tr.cnCTA+tc.getLastverSelectorFromState());
+        tc.typeCheckChanged(tr.cCTA, tr.cnCTA+tc.getLastverSelectorFromState());
     },    
     onCheckOther: function(e)
     {             
-        tc.typeCheckChanged(this, tr.cnOther+tc.getLastverSelectorFromState());
+        tc.typeCheckChanged(tr.cOther, tr.cnOther+tc.getLastverSelectorFromState());
     },     
     onCheckDetails: function(e)
     {
-        tc.infosCheckChanged(this,(this.checked?('.'+tr.cnInfo+'.'+tr.cnDetail):('.'+tr.cnInfo)));
-        tc.detailsCheckChanged(this.checked);          
+        tc.infosCheckChanged(tr.cDetails,(tr.cDetails.checked?('.'+tr.cnInfo+'.'+tr.cnDetail):('.'+tr.cnInfo)));
+        tc.detailsCheckChanged(tr.cDetails.checked);          
     }, 
     onCheckAdvanced: function(e)
     {
-        tc.infosCheckChanged(this,'.'+tr.cnInfo+'.'+tr.cnAdvanced);
+        tc.infosCheckChanged(tr.cAdvanced,'.'+tr.cnInfo+'.'+tr.cnAdvanced);
     }, 
     onCheckUrl: function(e)
     {
-        tc.allCheckChanged(this, '.'+tr.cnUrl, tv.vCell, true);
+        tc.allCheckChanged(tr.cUrl, '.'+tr.cnUrl, tv.vCell, true);
     },       
     /**
      * Click on Raise
@@ -1321,7 +1332,7 @@ var tc=
                 c++;
             }
         } 
-        node=tv.nodeRowDetail(content, cn+" "+tr.cnInfo+" "+tr.cnDetail, (visible&&infos&&content), true);
+        node=tv.nodeRowDetail(content, cn+" "+tr.cnInfo+" "+tr.cnDetail+cnLegacy, (visible&&infos&&content), true);
         tr.dTags.appendChild(node);     
               
         /* Advanced row **************************************************/     
@@ -1350,7 +1361,7 @@ var tc=
                 }                    
             }
         }    
-        node=tv.nodeRowDetail(scontent, cn + " "+tr.cnInfo+" "+tr.cnAdvanced, (visible&&advanced&&scontent), !content);
+        node=tv.nodeRowDetail(scontent, cn + " "+tr.cnInfo+" "+tr.cnAdvanced+cnLegacy, (visible&&advanced&&scontent), !content);
         tr.dTags.appendChild(node);   
         tc.setNodeArrow(arrow, (visible&&advanced&&scontent));
         

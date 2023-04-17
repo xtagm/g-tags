@@ -1,5 +1,5 @@
 {
-	"name": "XTag Google Analytics: Record and check UA & GA4",
+	"name": "XTag Google Analytics: Record & check UA,GA4",
 	"short_name" : "XTag GA",
 	"manifest_version": 2,
 	"version": "8.1.0",

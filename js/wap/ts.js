@@ -25,9 +25,10 @@ header:
     name:
     {
         page:[['utmdt'],['dt']],
-        cta:[['utme'],['el'],['ep.link_url'],['epn.value']], 
+        cta:[['utme'],['el'],['ep.link_url'],['epn.value'],['ep.menu_type']], 
         other:[['utmdt'],['dt']]
-    }
+    },
+    rowLabels:'Type\tProperty\tInfo_1\tInfo_2\tInfo_3\tURL\tTime\tQuery'
  },
 /**
  * Detail line 
@@ -42,7 +43,7 @@ detail:
         val:{}
     },
     /** Other recognized parameters: : [param, (ignored), value translation] */
-    other:[['utme'],['el'],['ev'],['pa'],['cg1'],['pr1id'],['pr1nm'],['pr1ca'],['ep.outbound'],['ep.file_name'],['ep.file_extension'],['en (1)'],['epn.value (1)'],['en (2)'],['epn.value (2)'],['en (3)'],['epn.value (3)'],['en (4)'],['epn.value (4)']]       
+    other:[['utme'],['el'],['ev'],['pa'],['cg1'],['pr1id'],['pr1nm'],['pr1ca'],['ep.outbound'],['ep.file_name'],['ep.file_extension'],['ep.menu_category_1'],['ep.menu_category_2'],['ep.menu_category_3'],['ep.menu_category_4'],['ep.menu_category_5'],['en (1)'],['epn.value (1)'],['en (2)'],['epn.value (2)'],['en (3)'],['epn.value (3)'],['en (4)'],['epn.value (4)']]       
 },
 /** 
  * Space dictionary 
@@ -79,6 +80,7 @@ param:
     '_rnd':'Gclid Deduper',
     '_s':'Hit Counter',
     '_ss':'Session Start',
+    '_tu':'Transport Url (hash)',
     '_u':'Usage info (features used)',
     '_uc':'User Country',
     '_uei':'_uei',
@@ -96,6 +98,7 @@ param:
     'aiid':'Application Installation ID',
     'aip':'Anonymize IP?',
     'an':'Application Name',
+    'are':'Attribution Reporting',
     'av':'Application Version',
     'br':'Item Brand',
     'ca':'Item Category Hierarchy 1',
@@ -126,6 +129,8 @@ param:
     'dh':'Document Hostname',
     'dit':'DOM Interactive Time',
     'dl':'Page Location',
+    'dma':'Digital Market Act',
+    'dma_cps':'Digital Market Act - Core Platform Sharing: (s)earch, (y)outube, (p)lay, s(h)opping, (a)ds, (m)aps, all (o)pt',
     'dns':'DNS Time',
     'dp':'Path',
     'dr':'Document Referrer',
@@ -148,13 +153,13 @@ param:
     'epn.percent_scrolled':'Percent scrolled',
     'epn.shipping':'Transaction Shipping',
     'epn.tax':'Transaction Tax',
-    'epn.value':'Transaction Revenue',
     'epn.value':'Value',
     'epn.value (_I_)':'Value ($0)',
     'ev':'Value',
     'exd':'Exception Description',
     'exf':'Exception Fatal?',
     'fl':'Flash version',
+    'frm':'Is IFrame event?',
     'gcd':'Google Consent Default',
     'gcs':'Google Consent Status',
     'gcu':'Google Consent Update',
@@ -193,6 +198,7 @@ param:
     'lp':'Item List Position',
     'ni':'Non Interaction',
     'npa':'Disable Advertising Personalization',
+    'nsi':'New Session Id',
     'pa':'Product Action',
     'pal':'Product Action List',
     'pdt':'Page Download Time',
@@ -217,8 +223,10 @@ param:
     'promo_I_id':'Promotion$0 ID',
     'promo_I_nm':'Promotion$0 Name',
     'promo_I_ps':'Promotion$0 Position',
+    'pscdl':'Privacy Sandbox Cookie Deprecation Label',
     'qt':'Queue Time',
-    'qt_I_':'Item $0 Quantity',    
+    'qt_I_':'Item $0 Quantity',
+    'richsstsse':'Enrich Server Side GTM',    
     'rrt':'Redirect Response Time',
     'sa':'Social Action',
     'sc':'Session Control',
@@ -229,11 +237,14 @@ param:
     'sn':'Social Network',
     'sr':'Screen Resolution',
     'srt':'Server Response Time',
+    'sst.uc':'User Country',
     'st':'Social Action Target',
     't':'Tracking Type',
     'ta':'Transaction Affiliation',
+    'tag_exp':'Tag Experiment (Google)',
     'tcc':'Transaction Coupon Code',
     'tcp':'TCP Connect Time',
+    'tfd':'Time For DOM (page performance)',
     'ti':'Transaction ID',
     'tid':'Tracking ID (GA property)',
     'tr':'Transaction Revenue',

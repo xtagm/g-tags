@@ -1,4 +1,5 @@
 *.zip
+*.bak
 *.vsidx
 js/ccomp/
 js/wap/ccomp/

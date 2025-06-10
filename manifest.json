@@ -1,9 +1,9 @@
 {
 	"name": "XTag Google Analytics: Record & check UA,GA4",
 	"short_name" : "XTag GA",
-	"manifest_version": 2,
-	"version": "8.1.0",
-	"minimum_chrome_version":"44.0.2403",
+	"manifest_version": 3,
+	"version": "9.0.0",
+	"minimum_chrome_version":"88.0.0000",
 
 	"description": "Categorize, record and display Google Analytics tags, with parameters meaning.", 
 
@@ -18,9 +18,10 @@
 	},
 
 	"options_page": "option.html",
-	"background": { "page":"background.html" },
+	"background": { "service_worker":"js/background.js" },
 
-	"browser_action": {
+	"action": {
+		"default_popup": "popup.html",
 		"default_icon": {
 		"16": "img/16bw.png",
 		"19": "img/19bw.png",		
@@ -30,7 +31,9 @@
 		"default_title": "XTag for Google Analytics"
 	},	
 
-	"permissions": ["storage","clipboardWrite","activeTab","webRequest",
+	"permissions": ["storage","clipboardWrite","activeTab","tabs", "webRequest","scripting"],
+
+	"host_permissions": [
 	"*://*/__utm.gif*",
 	"*://*.google-analytics.com/r*",
 	"*://*/collect*",

@@ -7,16 +7,28 @@
 /**
  * Background manager
  */
-var wx=window.chrome||window.browser;
+var bps=
+{
+    url:
+    {
+        install : "option.html",
+        update : "option.html"
+    }
+};
+var wx=chrome||browser;
 var bm=
 {
     persist : wx.storage.local,
+    currentWindow:
+    {
+        width : 0,
+        height : 0
+    },
     winid:null,//Id Tag Window
     timeoutID:null,
     loaded:null,
     charts:null,
     tabid : null,//Id Current tracked tab
-    clipboard:'',
     /**
      * Initialization
      */
@@ -46,18 +58,24 @@ var bm=
     },   
     isTabValid : function(tab)
     {
-        if (tab.url !== undefined)
-		{		
-			return (tab.url.indexOf("https://chrome.google.com") !== 0 && tab.url.indexOf("chrome://") !== 0  && tab.url.indexOf("chrome-extension://") !== 0);
-		}
+        if (tab !== undefined)
+        {       
+            if (tab.url !== undefined)
+            {		
+                return (tab.url.indexOf("https://chrome.google.com") !== 0 && tab.url.indexOf("chrome://") !== 0  && tab.url.indexOf("chrome-extension://") !== 0);
+            }
+        }
 		return false ;
     },   
     isTabChild : function(tab)
     {
-        if (tab.url !== undefined && wx.runtime.id !== undefined)
-		{
-			return (tab.url.indexOf(wx.runtime.id)>0);
-		}
+        if (tab !== undefined)
+        {
+            if (tab.url !== undefined && wx.runtime.id !== undefined)
+            {
+                return (tab.url.indexOf(wx.runtime.id)>0);
+            }
+        }
 		return false ;
     },
     /**
@@ -83,19 +101,6 @@ var bm=
             if (lastErr) 
             {
                 console.log('bm.enableList tab: ' + bm.tabid + ' lastError: ' + JSON.stringify(lastErr));
-            }
-            else
-            {
-                bm.clipboard='';
-                /*
-                setTimeout(function()
-                {
-                    wx.tabs.get(bm.tabid, function(tab) 
-                    {   
-                        wx.windows.update(tab.windowId, {"focused":true}); 
-                    });
-                },200);
-                */                
             }
         });
     },  
@@ -134,9 +139,9 @@ var bm=
                     else
                     {
                         bm.charts=bm.tabid;                            
-                        wx.tabs.executeScript(bm.tabid, {file: "js/lib/Chart.min.js" },function() 
+                        wx.tabs.executeScript(bm.tabid, {file: "../js/lib/Chart.min.js" },function() 
                         {
-                            wx.tabs.executeScript(bm.tabid, {file:'js/ccomp/ch.js'}, bm.doEnableView);
+                            wx.tabs.executeScript(bm.tabid, {file:'../js/ccomp/ch.js'}, bm.doEnableView);
                         });
                     }                  
                 });
@@ -169,10 +174,10 @@ var bm=
                     else
                     {
                         bm.loaded=bm.tabid;
-                        wx.tabs.insertCSS(bm.tabid, {file:'css/content.css'});
-                        wx.tabs.executeScript(bm.tabid, {file:'js/wap/ccomp/cp.js'},function()
+                        wx.tabs.insertCSS(bm.tabid, {file:'../css/content.css'});
+                        wx.tabs.executeScript(bm.tabid, {file:'../js/wap/ccomp/cp.js'},function()
                         {
-                            wx.tabs.executeScript(bm.tabid, {file:'js/ccomp/cc.js'}, fn);
+                            wx.tabs.executeScript(bm.tabid, {file:'../js/ccomp/cc.js'}, fn);
                         });
                     }  
                 });
@@ -193,10 +198,6 @@ var bm=
             {
                 console.log('bm.enableView tab: ' + bm.tabid + ' lastError: ' + JSON.stringify(lastErr));
             }
-            else
-            {
-                bm.clipboard='';             
-            }
         });
     },
     disableView : function()
@@ -211,21 +212,6 @@ var bm=
             }});
         }     
     },    
-    onCopy : function(text)
-    {
-        var input = document.createElement('textarea');
-        document.body.appendChild(input);
-        input.value = text;
-        input.focus();
-        input.select();
-        document.execCommand('Copy');
-        input.remove();        
-    },
-    onAddCopy : function(text)
-    {
-        bm.clipboard+=text;
-        bm.onCopy(bm.clipboard);
-    },
     onTabChanged : function(tabid)
     {
         bm.tabChanged(tabid, function()
@@ -265,7 +251,11 @@ var bm=
     },
     createWindow : function(item)
     {
-        var r=item.wTags||{'left':0,'top':window.screen.availHeight-200,'width':window.screen.width,'height':200};
+        chrome.windows.getCurrent({ populate: false }, (window) => {
+            bm.currentWindow.width = window.width;
+            bm.currentWindow.height = window.height;
+        });
+        var r=item.wTags||{'left':0,'top':bm.currentWindow.width-200,'width':bm.currentWindow.height,'height':200};
         wx.windows.create({url: "tags.html", type:"popup", left:(r.left||0), top:r.top, width:r.width, height:r.height}, 
         function(w)
         {
@@ -276,11 +266,11 @@ var bm=
     {
         bm.tabid=bm.isTabValid(tab)?tab.id:null;    
         bm.persist.get('wTags', bm.createWindow);// initialize bm.winid
-        wx.browserAction.setIcon({path:{
-        "16": "img/16.png",
-        "19": "img/19.png",     
-        "32": "img/32.png",
-        "38": "img/38.png"     
+        wx.action.setIcon({path:{
+        "16": "../img/16.png",
+        "19": "../img/19.png",     
+        "32": "../img/32.png",
+        "38": "../img/38.png"     
         }});
         bm.loaded = false;        
     }
@@ -290,8 +280,8 @@ var bm=
  */
 /**
  * Extension activation listener
- */
-wx.browserAction.onClicked.addListener(function(tab) 
+*/
+wx.action.onClicked.addListener(function(tab) 
 {     
     wx.windows.getCurrent(function(win) 
     {
@@ -325,7 +315,7 @@ if (wx.runtime.onInstalled)
             }
             break;
         case "update":
-            wx.browserAction.setPopup({popup:"popup.html"});
+            wx.action.setPopup({popup:"popup.html"});
             break;
         }               
 	});
@@ -347,17 +337,11 @@ wx.runtime.onMessage.addListener(function(message, sender, sendResponse)
                     bm.onPopup(tabs[0]);
                 }
             });
-            wx.browserAction.setPopup({popup:""});
+            wx.action.setPopup({popup:""});
             break;
         case 'bm_update':
             wx.tabs.create( {url: bps.url.update} );
             break;
-        case 'bm_copy':
-            bm.onCopy(message.text);
-            break;
-        case 'bm_addcopy':
-            bm.onAddCopy(message.text);
-            break;            
         case 'bm_resize':
             bm.onSizeChanged();
             break;
@@ -425,14 +409,14 @@ wx.windows.onRemoved.addListener(function(windowId)
         bm.disableView() ;
         bm.tabid = null;
         bm.winid = null;                
-        wx.browserAction.setIcon(
+        wx.action.setIcon(
         {
             path: 
             {
-            "16": "img/16bw.png",
-            "19": "img/19bw.png",       
-            "32": "img/32bw.png",
-            "38": "img/38bw.png"    
+            "16": "../img/16bw.png",
+            "19": "../img/19bw.png",       
+            "32": "../img/32bw.png",
+            "38": "../img/38bw.png"    
             } 
         }
         );
@@ -447,10 +431,10 @@ wx.windows.onFocusChanged.addListener(function(windowId)
    {
         bm.onSizeChanged();   
         if (windowId && windowId!==-1)
-        {    
-            wx.tabs.getSelected(windowId, function(tab)
-            {
-				if (tab !== undefined)
+        {   
+            wx.tabs.query({ active: true, currentWindow: true }, function(tabs) {
+            const tab = tabs[0];
+            if (tab !== undefined)
 				{
 					if (tab.id!==bm.tabid)
 					{

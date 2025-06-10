@@ -224,6 +224,7 @@ var cv=
  */
 var cc =
 { 
+    clipboard:'',
     /**
      * Targeted Tab and activation
      */
@@ -522,7 +523,8 @@ var cc =
         return (style.display !== 'none');
     },
     enableList : function(tid)
-    {        
+    {      
+        cc.clipboard='';  
         cc.collectNodes();
         if (cc.nodes.length)
         {            
@@ -558,11 +560,15 @@ var cc =
             window.removeEventListener(cp.tagResponse, cc.onTagListResponse);
             if (cc.list.count>0)
             {
-                var msg=cc.list.count.toString()+ " tracked CTA have been copied in the clipboard",t=cp.getNodeDescHeader()+cc.list.text;
+                var msg=cc.list.count.toString()+ " tracked CTA have been copied in the clipboard";
+                var t=cp.getNodeDescHeader()+cc.list.text;
+                cc.copyToClipboard(t) ;
+                /*
                 chrome.runtime.sendMessage({type:'bm_copy', text:t}, function()
                 {
                     chrome.runtime.sendMessage({type: 'tc_message', text:msg});
                 }); 
+                */
             }           
         }
     },
@@ -580,6 +586,7 @@ var cc =
      */
     enableView : function(tid, chart)
     {
+        cc.clipboard = '';
         if (!cc.enabled)
         {
             cc.tabid = tid;
@@ -636,7 +643,7 @@ var cc =
     {
         cc.disableView();       
         cc.onDisableView();
-    },    
+    },   
     /*********************************
      * Events Handlers
      */
@@ -645,7 +652,8 @@ var cc =
         var s=cp.ctaFromTip(cv.showTipCopied());
         if (s)
         {
-            chrome.runtime.sendMessage({type:'bm_addcopy', text:s+'\r\n'});
+            cc.clipboard+=s+'\r\n';
+            navigator.clipboard.writeText(cc.clipboard);
         }
     },    
     onMouseOver : function(e)

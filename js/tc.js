@@ -30,9 +30,9 @@ var tc=
         var firstParam = tp.getBlockBeginParam? tp.getBlockBeginParam() : "" ;
         var firstValue = tp.getBlockBeginParamValueFirst? tp.getBlockBeginParamValueFirst() : "" ;
         var nFirstIndex = -1 ;
-        if (tp.getBlockSectionMark)
+        if (tp.prepareUrlParser)
         {
-            u = u.replace(tp.getBlockSectionMark(), '');
+            u = tp.prepareUrlParser(u);
         }
         if (tp.getBlockMark)
         {
@@ -448,7 +448,7 @@ var tc=
         }
         if (s)
         {
-            tm.wx.runtime.sendMessage({type: 'bm_copy', text: s});
+            navigator.clipboard.writeText(s);
             tc.showMsgBar((c===1)?trs.copyDoneOne:trs.copyDone.replace('#',c.toString()));
         }        
     },
@@ -912,7 +912,7 @@ var tc=
         var s=node.textContent;
         if (s)
         {
-            tm.wx.runtime.sendMessage({type: 'bm_copy', text: s});
+            navigator.clipboard.writeText(s);
         }           
     },
     /**
@@ -923,7 +923,7 @@ var tc=
         var s=tc.getTagText(node, true);
         if (s)
         {
-            tm.wx.runtime.sendMessage({type: 'bm_copy', text: s});
+            navigator.clipboard.writeText(s);
         }        
     },
     /**
@@ -1005,7 +1005,7 @@ var tc=
         }
         else if (e.target.tagName==='A')
         {
-            tm.wx.runtime.sendMessage({type: 'bm_copy', text: e.target.href});
+            navigator.clipboard.writeText(e.target.href);
             tc.showMsgTag(e.target.parentNode, trs.copied);
         }
         else if (e.target.previousSibling)
@@ -1064,7 +1064,7 @@ var tc=
                     s=tp.getDataQuery(url, tc.getUrlParser(url), (purl?purl.href:''));
                     if (s)
                     {
-                        tm.wx.runtime.sendMessage({type: 'bm_copy', text: s});
+                        navigator.clipboard.writeText(s);
                         tc.showMsgTag(nodeMsg, tps.copiedData);                     
                     }
                 }
@@ -1414,7 +1414,7 @@ var tc=
      */   
     onBeforeRequest: function(details)
     {
-        if (details.method==='POST' && tc.record)
+        if (details.method==='POST' && tc.record && details.requestBody !== undefined)
         {
 			if (details.requestBody.raw !== undefined)
 			{
@@ -1425,7 +1425,7 @@ var tc=
 					if (p)
 					{
 						rq.url+="?"+p;
-						tm.wx.tabs.get(rq.tabId,function(Tab){tc.addRequest(rq, Tab.url);});
+						tm.wx.tabs.get(rq.tabId,function(Tab){if (Tab && Tab.url) tc.addRequest(rq, Tab.url);});
 					}
 				}
 			}
@@ -1438,7 +1438,7 @@ var tc=
             /* When still not done, collect the request before any redirection */
             if (rq.tabId >=0 && !tc.rqdone[rq.requestId] && tp.isRequest(rq))
             {                
-                tm.wx.tabs.get(rq.tabId,function(Tab){tc.addRequest(rq, Tab.url);});
+                tm.wx.tabs.get(rq.tabId,function(Tab){if (Tab && Tab.url) tc.addRequest(rq, Tab.url);});
             }
         }          
     },   
@@ -1490,7 +1490,7 @@ var tc=
             {
                 tc.rqdone[rq.requestId].done=true;
                 console.log(tps.name+" >> "+rq.url+" has returned: "+reason);
-                chrome.runtime.sendMessage({type:'bm_copy', text:reason+'\t'+rq.url+'\r\n'});
+                navigator.clipboard.writeText(reason+'\t'+rq.url+'\r\n');
                 tm.wx.runtime.sendMessage({type:'bm_newtag'});
                 tm.wx.runtime.sendMessage({type:'bm_focus'});
                 tc.showMsgBar((reason && reason.indexOf("net::ERR_BLOCKED_BY_CLIENT")==0)? trs.blockedRequest : trs.badRequest, null, false, 4500);

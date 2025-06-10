@@ -247,11 +247,12 @@ var tp=
          return v;
      },
      /**
-      * Return the mark of blocks section
+      * Prepare URL for parsing
       */
-     getBlockSectionMark:function()
+     prepareUrlParser:function(u)
      {
-        return 'richsstsse?';
+        u = u.replace('richsstsse?', '').replace('?en=', '&en=');
+        return u ;
      },
      /**
       * Return the mark of a new block

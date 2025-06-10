@@ -239,15 +239,18 @@ var bm=
     },
     startHighligth :function()
     {
-        if (!bm.timeoutID)
+        if (bm.winid && !bm.timeoutID)
         {
             wx.windows.update(bm.winid, {"drawAttention":true});
         }        
     },
     stopHighlight : function()
     {
-        bm.timeoutID=null;
-        wx.windows.update(bm.winid, {"drawAttention":false});
+        if (bm.winid)
+        {
+            bm.timeoutID=null;
+            wx.windows.update(bm.winid, {"drawAttention":false});
+        }
     },
     createWindow : function(item)
     {

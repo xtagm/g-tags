@@ -261,14 +261,66 @@ var tc=
     getTagText : function(node, withQuery)
     {
         var row=tv.getTableRowHeads(node, '\t'), att=node.getAttribute('index'), index=att?parseInt(att,10):-1, url='',purl=null;
-        row+=((index>=0 && index<tc.rqurl.length)?('\t'+decodeURIComponent(url=tc.rqurl[index])):'');
+        if (index>=0 && index<tc.rqurl.length)
+        {
+            url=tc.rqurl[index] ;
+            if (tp.getBlockMark)
+            {
+                url = url.replace(tp.getBlockMark(), '&');
+            }
+            row+=('\t' + decodeURIComponent(url));
+        }
         if (withQuery && url)
         {
             purl=node.querySelector('.'+tr.cnUrl+ '>a');
             row+=('\t'+tp.getDataQuery(url, tc.getUrlParser(url), purl?purl.href:''));
         }
         return row;    
-    },    
+    },   
+    getSelectedUrls : function()
+    {
+        var urls = [];
+        var an=document.querySelectorAll('.'+tr.cnTag), i=0, s='', c=0;
+        for (i=0;i<an.length;i++)
+        {
+            if (an[i].style.display===tv.vRow)
+            {
+                c++;
+                var att=an[i].getAttribute('index'), index=att?parseInt(att,10):-1;
+                if (index>=0 && index<tc.rqurl.length)
+                {
+                    urls.push(decodeURIComponent(tc.rqurl[index]));
+                }
+            }
+        }
+        return urls;    
+    },   
+    getSelectedUrlsAsTsv : function()
+    {
+        var urls = tc.getSelectedUrls();
+        const allParams = new Set();
+        const rows = [];
+        
+        // Extract parameters from url
+        const parsedRows = urls.map(url => {
+            const params = tc.getUrlParser(url);
+            Object.keys(params).forEach(key => allParams.add(key));
+            return params;
+        });
+        
+        const headers = Array.from(allParams);
+        rows.push(headers.join('\t'));
+        
+        // Build TSV
+        parsedRows.forEach(paramObj => {
+            const row = headers.map(header => paramObj[header] || '');
+            rows.push(row.join('\t'));
+        });
+        const tsvText = rows.join('\r\n') ;
+        const rowCount = urls.length ;
+        return { tsvText, rowCount };
+              
+    }, 
     /**
      * Recording status changed (manage record timer)
      */
@@ -285,7 +337,37 @@ var tc=
         }
     },
     /**
-     * Clic on record light
+     * Show confirm box overlay
+     */
+    showConfirm : function(callbackYes)
+    {
+        // Set confirm text and display box
+        tr.tMsgConfirm.textContent = trs.clearConfirm;
+        tr.dBoxConfirm.style.display = 'block';
+        tr.dOverlay.style.display = 'block';
+
+        // Handle routines
+        const handleYes = () => {
+            hideConfirm();
+            callbackYes();
+        };
+        const handleNo = () => {
+            hideConfirm();
+        };   
+        // Hide routine
+        function hideConfirm()
+        {
+            tr.dBoxConfirm.style.display = 'none';
+            tr.dOverlay.style.display = 'none';
+            tr.bConfirmYes.removeEventListener('click', handleYes);
+            tr.bConfirmNo.removeEventListener('click', handleNo);
+        }
+        // Set buttons listeners
+        tr.bConfirmYes.addEventListener('click', handleYes);
+        tr.bConfirmNo.addEventListener('click', handleNo);
+    },
+    /**
+     * Click on record light
      */
     onClickRecord : function(e)
     {
@@ -448,17 +530,33 @@ var tc=
         }
         if (s)
         {
+            // Add rows header
+            s = (ts.header.rowLabels + '\r\n' + s) ;
             navigator.clipboard.writeText(s);
             tc.showMsgBar((c===1)?trs.copyDoneOne:trs.copyDone.replace('#',c.toString()));
         }        
     },
+    onClickCopyTsv : function(e)
+    {
+        const result = tc.getSelectedUrlsAsTsv() ;
+        if (result.tsvText)
+        {
+            navigator.clipboard.writeText(result.tsvText);
+            tc.showMsgBar((result.rowCount===1)?trs.copyDoneOne:trs.copyDone.replace('#',result.rowCount.toString()));
+        }        
+    },  
     /**
      * Clear content event
      */
     onClickClear : function(e)
     {
-        tr.dTags.innerHTML= "";
-        tc.rqurl.length=0;
+        if (tc.rqurl.length > 0)
+        {
+            tc.showConfirm(function(){
+                tr.dTags.innerHTML= "";
+                tc.rqurl.length=0;          
+            });
+        }
     },
     /**
      * Click on chevron event
@@ -670,7 +768,8 @@ var tc=
         {
             tr.bBook.addEventListener(cev, tc.onClickBook);
         }
-        tr.bCopy.addEventListener(cev, tc.onClickCopy);       
+        tr.bCopy.addEventListener(cev, tc.onClickCopy);     
+        tr.bCopytsv.addEventListener(cev, tc.onClickCopyTsv);                
         tr.bClear.addEventListener(cev, tc.onClickClear); 
         /*
          * Viewers and user settings

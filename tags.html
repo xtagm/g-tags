@@ -20,7 +20,7 @@
 			</span>
 			<label>|</label>
 			<span class="cspan">
-				<input type="checkbox" id="lastver">
+				<input type="checkbox" id="lastver" checked=true>
 				<label for="lastver"></label>
 			</span>
 			<label>|</label>							
@@ -54,6 +54,8 @@
 		
 			<span id="clear" class="ctrash cicon cright">				
 			</span>				
+			<span id="copytsv" class="ccopytable cicon cright">				
+			</span>					
 			<span id="copy" class="ccopy cicon cright">				
 			</span>	
 			<span id="chevron" class="creduce cicon cright">				
@@ -68,6 +70,14 @@
 		<div id="msg" class="msgtip">			
 		</div>
 		<div id="help" class="msgtip help">	
-		</div>		
+		</div>	
+
+		<div id="overlay" class="hidden"></div>
+		<div id="boxconfirm" class="hidden">
+			<p id="msgconfirm"></p>
+			<button id="confirmyes" class="cbtn-user cright btnmarginleft">Yes</button>
+			<button id="confirmno" class="cbtn-user cright">No</button>
+		</div>
+			
 	</body>
 </html>

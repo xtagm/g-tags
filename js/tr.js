@@ -22,7 +22,8 @@ var trs=
     rightClick:"Right click to copy this value",
     tagurl:"Reopen page - Right click to copy URL",
     copied:'Copied', 
-    empty: '(empty: logged as url)',   
+    empty: '(empty: logged as url)', 
+    clearConfirm: 'Do you really want to clear all recorded tags?',  
        
     title:{
         page:"Show/Hide Page tags",
@@ -33,7 +34,8 @@ var trs=
         advanced:"Show/Hide all tag parameters",  
         lastver:"Show only last version tags/All tags",  
         clear:"Clear all recorded tags",
-        copy:"Copy all displayed tags",
+        copy:"Copy all displayed tags with their query",
+        copytsv:"Copy all displayed tag queries to TSV format with parameters in header and values in columns",
         chevron:"Collapse control bar",
         record:"Stop recording", 
         view:"(xtm/setm) In-Page CTA Spy",
@@ -93,10 +95,14 @@ var tr=
      */
     init: function()
     {
-        /* Nodes */
+        /* 
+        * Nodes 
+        * Important: all IDs must be lowercase and without their first letter below
+        * ---------
+        */
         var i=0, node=null, id='',title='';
-        an=['cPage','cCTA','cOther','cUrl','cDetails','cAdvanced','cLastver','bList','bView','bRaise','bChart','bUser','bChevron','bCopy','bBook','bClear','bApply','dRecord','dBar','dTags','dContent','dMsg',
-            'dHelp','dUserContent','fUserForm','tEmail','tPwd','sPeriod'];
+        an=['cPage','cCTA','cOther','cUrl','cDetails','cAdvanced','cLastver','bList','bView','bRaise','bChart','bUser','bChevron','bCopy','bCopytsv','bBook','bClear','bApply','dRecord','dBar','dTags','dContent','dMsg',
+            'dHelp','dUserContent','fUserForm','tEmail','tPwd','sPeriod','dOverlay','dBoxConfirm','tMsgConfirm','bConfirmYes','bConfirmNo'];
         for (i=0;i<an.length;i++)
         {
             id=an[i].substr(1).toLowerCase();

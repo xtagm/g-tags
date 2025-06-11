@@ -1589,11 +1589,18 @@ var tc=
             {
                 tc.rqdone[rq.requestId].done=true;
                 console.log(tps.name+" >> "+rq.url+" has returned: "+reason);
-                navigator.clipboard.writeText(reason+'\t'+rq.url+'\r\n');
                 tm.wx.runtime.sendMessage({type:'bm_newtag'});
                 tm.wx.runtime.sendMessage({type:'bm_focus'});
-                tc.showMsgBar((reason && reason.indexOf("net::ERR_BLOCKED_BY_CLIENT")==0)? trs.blockedRequest : trs.badRequest, null, false, 4500);
-            }
+                try
+                {
+                    navigator.clipboard.writeText(reason+'\t'+rq.url+'\r\n');
+                    tc.showMsgBar((reason && reason.indexOf("net::ERR_BLOCKED_BY_CLIENT")==0)? trs.blockedRequest : trs.badRequest, null, false, 4500);
+                }
+                catch (error)
+                {
+                    console.log("... couldn't be written into the clipboard ("+error+")");
+                }
+             }
         }          
     },    
     onKeyDown : function(e)

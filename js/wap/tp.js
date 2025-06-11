@@ -252,6 +252,18 @@ var tp=
      prepareUrlParser:function(u)
      {
         u = u.replace('richsstsse?', '').replace('?en=', '&en=');
+        try 
+        {
+            const urlObj = new URL(u);
+            if (urlObj.hostname.indexOf('doubleclick') > 0)
+            {
+                u += '&doubleclick=DoubleClick';
+            }
+        }
+        catch (error) 
+        {
+            console.error('URL invalide:', error);
+        }   
         return u ;
      },
      /**

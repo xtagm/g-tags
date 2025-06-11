@@ -26,7 +26,7 @@ header:
     {
         page:[['utmdt'],['dt']],
         cta:[['utme'],['el'],['ep.link_url'],['epn.value'],['ep.menu_type']], 
-        other:[['utmdt'],['dt']]
+        other:[['utmdt'],['doubleclick'],['dt']]
     },
     rowLabels:'Type\tProperty\tInfo_1\tInfo_2\tInfo_3\tURL\tTime\tQuery'
  },
@@ -132,6 +132,7 @@ param:
     'dma':'Digital Market Act',
     'dma_cps':'Digital Market Act - Core Platform Sharing: (s)earch, (y)outube, (p)lay, s(h)opping, (a)ds, (m)aps, all (o)pt',
     'dns':'DNS Time',
+    'doubleclick':'Google Remarketing',
     'dp':'Path',
     'dr':'Document Referrer',
     'ds_I_':'Item $0 Discount',

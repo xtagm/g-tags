@@ -2,4 +2,6 @@
 *.bak
 js/ccomp/
 js/wap/ccomp/
-
+/.vs
+.project
+devinit

@@ -352,7 +352,10 @@ wx.runtime.onMessage.addListener(function(message, sender, sendResponse)
             bm.startHighligth();
             break;
         case 'bm_focus':
-            wx.windows.update(bm.winid, {"focused":true}); 
+            if (bm.winid)
+            {
+                wx.windows.update(bm.winid, {"focused":true}); 
+            }
             break ;   
         case 'bm_enableList':   
             if (bm.tabid)

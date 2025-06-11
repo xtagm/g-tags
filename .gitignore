@@ -1,10 +1,5 @@
 *.zip
 *.bak
-*.vsidx
 js/ccomp/
 js/wap/ccomp/
-js/backup/
-/nbproject/private/
-.vs/VSWorkspaceState.json
-.vs/g-tags/v17/DocumentLayout.json
-.vs/g-tags/v17/.wsuo
+

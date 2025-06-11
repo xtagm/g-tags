@@ -6,14 +6,14 @@ goto end
 :compress
 cd js
 echo -- Compile sources -------------------
-call D:\Utils\closurecompiler.bat tc.js
-call D:\Utils\closurecompiler.bat tr.js
-call D:\Utils\closurecompiler.bat tm.js
-call D:\Utils\closurecompiler.bat tv.js
-call D:\Utils\closurecompiler.bat cc.js
+call ..\compiler.bat tc.js ..\compiler.jar
+call ..\compiler.bat tr.js ..\compiler.jar
+call ..\compiler.bat tm.js ..\compiler.jar
+call ..\compiler.bat tv.js ..\compiler.jar
+call ..\compiler.bat cc.js ..\compiler.jar
 cd wap
-call D:\Utils\closurecompiler.bat tp.js
-call D:\Utils\closurecompiler.bat ts.js
-call D:\Utils\closurecompiler.bat cp.js
+call ..\..\compiler.bat tp.js ..\..\compiler.jar
+call ..\..\compiler.bat ts.js ..\..\compiler.jar
+call ..\..\compiler.bat cp.js ..\..\compiler.jar
 :end
 pause

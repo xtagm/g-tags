@@ -314,8 +314,6 @@ param:
     'utmul':'Browser Language',
     'utmvp':'Viewport Resolution',
     'utmwv':'SDK Version',
-    'utt':'Timing Time',
-    'utv':'Timing Variable',
     'v':'Protocol Version',
     'va':'Item Variant',
     'vp':'Viewport Resolution',

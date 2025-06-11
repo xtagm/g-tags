@@ -5,9 +5,9 @@ call D:\Utils\closurecompiler.bat tr.js
 call D:\Utils\closurecompiler.bat tm.js
 call D:\Utils\closurecompiler.bat tv.js
 call D:\Utils\closurecompiler.bat cc.js
-call D:\Utils\closurecompiler.bat background.js
+rem call D:\Utils\closurecompiler.bat background.js
 cd wap
-call D:\Utils\closurecompiler.bat bp.js
+rem call D:\Utils\closurecompiler.bat bp.js
 call D:\Utils\closurecompiler.bat tp.js
 call D:\Utils\closurecompiler.bat ts.js
 call D:\Utils\closurecompiler.bat cp.js

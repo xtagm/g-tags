@@ -12,7 +12,7 @@ var bps=
     url:
     {
         install : "option.html",
-        update : "option.html"
+        update : "option.html?changelog=true"
     }
 };
 var wx=chrome||browser;

@@ -1,172 +1,317 @@
-<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
-<html xmlns="http://www.w3.org/1999/xhtml">
-	<!--
-	/*!
-	* G-Tags, A Google Chrome Extension for Google Analytics tags tracking.
-	*/
-	//-->
-	<head>
-		<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
-		<title>XTag for Google Analytics</title>
-		<style type="text/css">
-			body {font-family:Arial,sans-serif;padding:0;margin:0;}
-			#header {position:fixed;color:white;background:#345268;width:100%}
-			h2 {font-size:1em;padding:10px;margin:0;}
-			h4 {font-size:0.9em;padding: 1em 0 0;color:#626469}
-			li {font-size:0.8em}
-			p {font-size:0.9em;color:#626469}
-		</style>
-	</head>
+<!DOCTYPE html>
+<html lang="en" data-theme="">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>XTag for Google Analytics</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&display=swap" rel="stylesheet">
+  <style>
+	:root {
+  --bg: #f9fafb;
+  --text: #1f2937;
+  --muted: #4b5563;
+  --header-bg: #1a73e8;
+  --card-bg: white;
+  --divider: #e5e7eb;
+  --link: #2563eb;
+	}
 
-	<body>
-		<div id="header">
-			<h2>XTag for Google Analytics | Record and check UA &amp; GA4 tags</h2>
-		</div>
-		<div align="center" style="padding-top:25px;padding-left:10px;">
-			<table width=100% border="0">
-				<tr>
-					<td>
-					<p><i>Works with any Chromium engine (Chrome, Edge, Brave...) v88 and further.</i></p>
-					<h4>Extension icon :</h4>					
-					<ul>
-						<li>
-							Click on grayed icon: extension window is displayed, icon is highlighted, tags recording begins, just navigate any website with GA tracking.
-							<br><u>Note:</u> if there's some Adblocker extension preventing tag firing from the website, GA tag won't be recorded nor displayed but you'll be warned it has been copied in the clipboard.
-						</li>
-						<li>
-							Click on highlighted icon to display extension window when overlapped or minimized.
-						</li>	
-						<li>
-							Close extension window: icon is grayed, tags recording ends.
-						</li>
-					</ul>
-					<h4>Extension window :</h4>	
-					<ul>	
-						<li>
-							Click on orange led to stop/resume recording.			
-						</li>
-						<li>
-							Click on bolt icon to stop/allow extension window raising when a tag is recorded.			
-						</li>	
-						<li>
-							Check <b>GA4 only</b> to display only GA4 tags (UA tags are still recorded, so they will be displayed when unchecked).			
-						</li>																															
-						<li>
-							Uncheck <b>Pages</b> or <b>Events</b> or <b>Others</b> to hide them (they are still recorded, so they will be displayed when checked again).				
-						</li>
-						<li>
-							Check <b>Page URL</b> to see the URL that triggered the tag.		
-						</li>						
-						<li>
-							Check <b>Details</b> to see a selection of data.				
-						</li>
-						<li>
-							Check <b>Advanced</b> to see all data.				
-						</li>
-						<li>
-							Click on chevron to collapse control bar (or double click anywhere on it), click on collapsed bar to expand it.			
-						</li>
-						<li>
-							Double-click on tag type or click on its arrow to show/hide all its details.	
-						</li>
-						<li>
-							Right-click on tag values to copy them.	
-						</li>						
-						<li>
-							Mouse hover advanced details to see parameters meaning.	
-						</li>						
-						<li>
-							Click on control bar copy icon to Copy all displayed tag summaries and raw queries to TSV format with header that can be pasted into Excel.			
-						</li>
-						<li>
-							Click on control bar table icon to Copy all displayed tag queries sliced into TSV format with parameters in header and values in columns that can be pasted into Excel.			
-						</li>									
-						<li>
-							Click on copy icon on row's left to copy only this tag			
-						</li>																						
-						<li>
-							Click on trash icon to remove all recorded tags.			
-						</li>						
-					</ul>
-					<h4>Privacy :</h4>
-						<ul>
-							<li>
-								XTag Google Analytics doesn't transmit any data and will never do it.
-							</li>
-						</ul>
-					<h4>Uninstall :</h4>
-					<ol>
-						<li>
-							Right click on XTag Google Analytics icon.
-						</li>
-						<li>
-							Select <b>Remove from Chrome</b>.
-						</li>
-						<li>
-							Click on <b>Remove</b> button.
-						</li>						
-					</ol>
-					<h4>Changelog :</h4>
-					<ul>
-					   <li>				
-					    <b>9.0</b>: 12/06/2025 - Manifest V3 - Add Clear tags confirmation - Add Copy all tags queries to TSV format with parameters in header and values in columns - New parameters recognition.
-					   </li>							
-                       <li>				
-					    <b>8.1</b>: 17/04/2023 - Add <b>GA4 only</b> filter - New parameters recognition - Prioritization of <i>page_view</i> in GA4 requests with multiple events - AdBlocker detection &amp; warning.
-   				       </li>						
-                       <li>				
-					    <b>8.0</b>: 13/04/2023 - Add <b>GA4</b> tracking.
-   				       </li>												
-                       <li>				
-					    <b>7.4</b>: 23/06/2018 - Rotating arrow to command and visualize tag expand.
-   				       </li>						
-                       <li>				
-					    <b>7.3</b>: 21/06/2018 - Detect, decode and log POST requests.
-   				       </li>					
-                       <li>				
-					    <b>7.1</b>: 10/04/2018 - Bolt icon to control window raising.
-   				       </li>					
-                       <li>				
-					    <b>7.0</b>: 02/04/2018 - New branding. Individual tag copy.
-   				       </li>							
-                       <li>				
-					    <b>6.0</b>: 04/03/2018 - Update with common tags tracker engine. Minor bugs fixes.
-   				       </li>						
-                       <li>				
-					    <b>2.3</b>: 01/02/2018 - Display Event category, action and label on header line. Minor improvements.
-   				       </li>							
-                       <li>				
-					    <b>2.2</b>: 22/09/2017 - Enrich Tag type tip with used parameter. Minor fixes and improvements. Recognize SE properties.
-   				      </li>							
-                       <li>				
-					    <b>2.1</b>: 21/09/2017 - Minor bugs fixes.
-   				      </li>							
-                       <li>				
-					    <b>2.0</b>: 20/09/2017 - New look  &amp; feel - Automatic copy on double clik - Clear all with right double click.
-   				      </li>							
-                        <li>				
-					    <b>1.3</b>: 16/02/2017 - Minor presentation corrections.
-   				      </li>		                        
-   				      <li>				
-					    <b>1.2</b>: 13/02/2017 - Parameters meaning completion.
-   				      </li>							
-                        <li>				
-					    <b>1.1</b>: 13/02/2017 - Default checks changed.
-   				      </li>									
-                        <li>				
-					    <b>1.0</b>: 12/02/2017 - Initial version.
-   				      </li>
-					 
+	[data-theme="dark"] {
+	  --bg: #383c45;
+	  --text: #f3f4f6;
+	  --muted: #9ca3af;
+	  --header-bg: #0f172a;
+	  --card-bg: #1f2937;
+	  --divider: #374151;
+	  --link: #3b82f6;
+	}
 
-					  </ul>
-<hr />					  
-					<p align="justify">
-						<em>Author: Denis Rousseau - Copyright © 2025</em>
-					  </p>
-					</td>
-				</tr>
-			</table>
-		</div>
 
-	</body>
+    body.dark {
+      --bg: #383c45;
+      --text: #f3f4f6;
+      --muted: #9ca3af;
+      --header-bg: #0f172a;
+      --card-bg: #1f2937;
+	  --btn-bg: white;
+	  --btn-text: #1f2937;
+      --divider: #374151;
+      --link: #3b82f6;
+    }
+
+    body {
+      font-family: 'Inter', sans-serif;
+      margin: 0;
+      background-color: var(--bg);
+      color: var(--text);
+      line-height: 1.6;
+      transition: background-color 0.3s ease, color 0.3s ease;
+    }
+
+    header {
+      position: fixed;
+      top: 0;
+      width: 100%;
+      background-color: var(--header-bg);
+      color: white;
+      padding: 1rem;
+      box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+      z-index: 1000;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    header h2 {
+      margin: 0;
+      font-size: 1.2rem;
+    }
+
+    #theme-toggle {
+      background: var(--btn-bg);
+      color: var(--btn-text);
+      border: none;
+      padding: 6px 12px;
+      margin-right: 40px;
+      border-radius: 6px;
+      cursor: pointer;
+      font-size: 0.9rem;
+      box-shadow: 0 1px 4px rgba(0,0,0,0.1);
+      transition: background 0.3s ease, color 0.3s ease;
+    }
+
+    main {
+      max-width: 1024px;
+      margin: 100px auto 40px;
+      padding: 0 1.5rem;
+      background: var(--card-bg);
+      border-radius: 8px;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+    }
+
+    h4 {
+      margin-top: 2rem;
+      font-size: 1rem;
+    }
+
+    ul, ol {
+      padding-left: 1.5rem;
+    }
+
+    ul li, ol li {
+      margin-bottom: 0.75rem;
+      font-size: 0.95rem;
+    }
+
+    p {
+      font-size: 0.95rem;
+      color: var(--muted);
+    }
+
+    em {
+      font-style: italic;
+    }
+
+    hr {
+      margin: 2rem 0;
+      border: none;
+      border-top: 1px solid var(--divider);
+    }
+
+    a {
+      color: var(--link);
+      text-decoration: none;
+    }
+
+    a:hover {
+      text-decoration: underline;
+    }
+
+    .icon {
+      width: 1.2rem;
+      height: 1.2rem;
+      display: inline-block;
+      vertical-align: middle;
+      color: var(--text);
+      fill: currentColor;
+    }
+
+    .icon-btn {
+      background: none;
+      border: none;
+      padding: 0.5rem;
+      cursor: pointer;
+      color: var(--text);
+    }
+
+    #popup-overlay {
+      position: fixed;
+      inset: 0;
+      background: rgba(0, 0, 0, 0.6);
+      display: none;
+      justify-content: center;
+      align-items: center;
+      z-index: 2000;
+    }
+
+    #popup-box {
+      position: relative;
+      max-width: 800px;
+      background: var(--card-bg);
+      color: var(--text);
+      padding: 2rem;
+      border-radius: 10px;
+      box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2);
+      font-size: 0.95rem;
+      line-height: 1.6;
+    }
+
+    #popup-box h3 {
+      margin-top: 0;
+      font-size: 1.3rem;
+      font-weight: 600;
+      margin-bottom: 1rem;
+    }
+
+    #popup-close {
+      position: absolute;
+      top: 16px;
+      right: 16px;
+      background: none;
+      border: none;
+      cursor: pointer;
+      padding: 0.5rem;
+      color: var(--text);
+    }
+    #mode-toggle {
+      margin-right: 30px;
+    }
+    #popup-close .icon,
+    #mode-toggle .icon {
+      color: var(--text);
+      fill: currentColor;
+      opacity: 0.7;
+      transition: opacity 0.2s ease;
+    }
+
+    #popup-close:hover .icon {
+      opacity: 1;
+    }
+
+    svg use {
+      stroke: currentColor;
+      fill: currentColor;
+    }
+
+    #mode-toggle .icon {
+      color: white !important;
+    }
+  </style>
+</head>
+<body>
+<!-- SVG Symbols (Hidden) -->
+<svg style="display: none;">
+  <symbol id="icon-moon" viewBox="0 0 24 24">
+    <path d="M21 12.79A9 9 0 0 1 11.21 3a7 7 0 1 0 9.79 9.79z" />
+  </symbol>
+  <symbol id="icon-sun" viewBox="0 0 24 24">
+    <path d="M6.76 4.84l-1.8-1.79-1.41 1.41 1.79 1.8 1.42-1.42zm10.48 0l1.8-1.79 1.41 1.41-1.79 1.8-1.42-1.42zM12 4V1h-1v3h1zm0 19v-3h-1v3h1zm8-8h3v-1h-3v1zm-19 0h3v-1H1v1zm3.34 7.66l1.79-1.8-1.42-1.42-1.8 1.79 1.43 1.43zm14.32 0l-1.79-1.8-1.42 1.42 1.8 1.79 1.41-1.41zM12 7a5 5 0 1 0 0 10 5 5 0 0 0 0-10z"/>
+  </symbol>
+  <symbol id="icon-close" viewBox="0 0 24 24">
+    <path d="M18 6L6 18"/>
+    <path d="M6 6l12 12"/>
+  </symbol>
+</svg>
+
+<header>
+  <h2>XTag for Google Analytics | Record and check UA & GA4 tags</h2>
+  <button id="mode-toggle" class="icon-btn" title="Toggle dark mode">
+    <svg class="icon" id="theme-icon"><use xlink:href="#icon-moon"></use></svg>
+  </button>
+</header>
+
+  <main>
+    <p><i>Works with any Chromium engine (Chrome, Edge, Brave...) v88 and further.</i></p>
+
+    <h4>XTag icon</h4>
+    <ul>
+      <li>Click on grayed icon to start tag recording and highlight the icon. Navigate any GA-tracked website.</li>
+      <li>If an Adblocker prevents tag firing, it's not displayed but copied to the clipboard and user is notified.</li>
+      <li>Click highlighted icon again to reopen the extension window.</li>
+      <li>Closing the extension window ends recording and grays out the icon.</li>
+    </ul>
+
+    <h4>XTag window</h4>
+    <ul>
+      <li>Click Orange LED icon to pause/resume recording.</li>
+      <li>Click Bolt icon to toggle window popup on each tag.</li>
+      <li>Use <b>GA4 only</b> to ignore legacy UA tags.</li>
+      <li>Toggle <b>Pages</b>, <b>Events</b>, <b>Others</b> to show/hide them.</li>
+      <li>Enable <b>Page URL</b>, <b>Details</b>, or <b>Advanced</b> to display more info.</li>
+      <li>Click the chevron or double-click the control bar to collapse/expand it.</li>
+      <li>Double-click or click arrows to toggle tag details.</li>
+      <li>Right-click tag values to copy them.</li>
+      <li>Hover advanced details for parameter identification.</li>
+      <li>Click Copy icon to copy tags summaries as TSV (Excel).</li>
+	  <li>Click Table icon to copy tags queries as TSV (Excel).</li>
+      <li>Click Trash icon to clear all recorded tags (after confirmation).</li>
+    </ul>
+
+    <h4>XTag Privacy</h4>
+    <ul>
+      <li>XTag for Google Analytics neither collects nor transmits any data — and never will!</li>
+    </ul>
+
+    <h4>XTag Uninstall</h4>
+    <ol>
+      <li>Right-click the XTag icon.</li>
+      <li>Select <b>Remove from Chrome</b>.</li>
+      <li>Click the <b>Remove</b> button.</li>
+    </ol>
+
+    <h4>XTag Changelog</h4>
+    <ul>
+      <li><b>9.0</b>: 12/06/2025 - Manifest V3, Clear tags confirmation, advanced TSV copy, new parameters identification <a href="#">(more details)</a>.</li>
+      <li><b>8.1</b>: 17/04/2023 - [GA4 only] filter, new parameters identification, prioritization of <i>page_view</i>, AdBlocker detection, notification and copy.</li>
+      <li><b>8.0</b>: 13/04/2023 - GA4 tracking added.</li>
+      <li><b>7.4</b>: 23/06/2018 - Tag expand arrow animation.</li>
+      <li><b>7.3</b>: 21/06/2018 - POST request decoding.</li>
+      <li><b>7.1</b>: 10/04/2018 - Bolt icon for window control.</li>
+      <li><b>7.0</b>: 02/04/2018 - New branding, individual tag copy.</li>
+      <li><b>6.0</b>: 04/03/2018 - Unified tag tracker, bug fixes.</li>
+      <li><b>2.3</b> to <b>1.0</b>: Various improvements and bug fixes.</li>
+    </ul>
+
+    <hr />
+    <p><em>Author: Denis Rousseau — © 2025</em></p>
+  </main>
+
+  <!-- Popup Overlay -->
+  <div id="popup-overlay" style="display:none;">
+    <div id="popup-box">
+	<button id="popup-close" class="icon-btn" title="Close">
+	<svg class="icon"><use xlink:href="#icon-close"></use></svg>
+	</button>
+      <h3>XTag Google Analytics 9.0</h3>
+      <ul>
+        <li>By default, XTag no longer pops up for each tag. Click the bolt icon if you want to restore the previous behavior.</li>
+        <li>The "GA only" option is now checked by default. UA tags are no longer relevant and this option will be removed in future versions.</li>
+        <li>When an Adblocker prevents tag firing, now it's appended to the previously copied ones in the clipboard, allowing to collect them all. User is still notified.</li>
+        <li>Remarketing tags (doubleclick) are now clearly identified.</li>
+        <li>GA parameters identification has been completed.</li>
+        <li>Clicking the Trash icon now requires confirmation — a long-standing user request.</li>
+        <li>Clicking the Copy icon now includes a header in the TSV (Tab-Separated Values) format.</li>
+        <li>Clicking the Table icon copies the same tag set to the clipboard, organized by parameters names in the header and values in the columns.</li>
+      </ul>
+      <p>To generate a full report, you can combine these last two features:</p>
+      <ol>
+        <li>Click Copy icon, then paste into a blank Excel sheet.</li>
+        <li>Click Table icon, then paste into the same sheet, same row (usually 1), column I.</li>
+      </ol>
+    </div>
+  </div>
+
+ <script src="option.js"></script>
+  
+</body>
 </html>

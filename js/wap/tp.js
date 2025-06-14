@@ -16,7 +16,7 @@ var tps=
         cta:"Show/Hide Event tags",
         other:"Show/Hide other tags (Display advertising, Timing, Transaction, Item, Custom...)",
         rowdata:"Copy data and open Query Explorer to import - Right Click to just copy",
-        rowcopy:"Copy this tag",
+        rowcopy:"Copy this tag summary and raw query to TSV format without header",
         lastver:"Show GA4 tags only / UA & GA4 tags"       
     },
     clabel:{

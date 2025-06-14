@@ -27,7 +27,8 @@
     function setTheme(theme) {
       document.body.classList.toggle('dark', theme === 'dark');
       themeIcon.querySelector('use').setAttribute('href', theme === 'dark' ? '#icon-sun' : '#icon-moon');
-      localStorage.setItem('theme', theme);
+      modeToggle.title = (theme === 'dark' ? 'Toggle light mode' : 'Toggle dark mode');
+     localStorage.setItem('theme', theme);
     }
 
     function getPreferredTheme() {

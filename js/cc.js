@@ -1,7 +1,7 @@
 /**
  * @license @title Content Controller and View
  * @author DENIS ROUSSEAU
- * @version 3.0
+ * @version 9.0
  */
 /*jslint nomen: true, plusplus: true, regexp: true, evil: true, continue: true*/
 /**

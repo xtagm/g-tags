@@ -20,11 +20,11 @@ header:
     /** Column SpaceSub: Event category (UA) or Event Name (GA4) - Optional */
     spsub:[['ec'],['en']],
     /** Column Complement: Event action (UA) or Event parameter (GA4) - Optional */
-    compl:[['ea'],['ep.link_classes'],['ep.link_text'],['epn.percent_scrolled'],['epn.video_percent']],  // Optional
+    compl:[['ea'],['ep.link_classes'],['ep.link_text']],  // Optional
     /** Column Name: [param, contextual name] */
     name:
     {
-        page:[['utmdt'],['dt']],
+        page:[['utmdt'],['dt'],['dl']],
         cta:[['utme'],['el'],['ep.link_url'],['epn.value'],['ep.menu_type']], 
         other:[['utmdt'],['doubleclick'],['dt']]
     },
@@ -43,7 +43,7 @@ detail:
         val:{}
     },
     /** Other recognized parameters: : [param, (ignored), value translation] */
-    other:[['utme'],['el'],['ev'],['pa'],['cg1'],['pr1id'],['pr1nm'],['pr1ca'],['ep.outbound'],['ep.file_name'],['ep.file_extension'],['ep.menu_category_1'],['ep.menu_category_2'],['ep.menu_category_3'],['ep.menu_category_4'],['ep.menu_category_5'],['en (1)'],['epn.value (1)'],['en (2)'],['epn.value (2)'],['en (3)'],['epn.value (3)'],['en (4)'],['epn.value (4)']]       
+    other:[['utme'],['el'],['ev'],['pa'],['cg1'],['pr1id'],['pr1nm'],['pr1ca'],['ep.outbound'],['ep.file_name'],['ep.file_extension'],['epn.percent_scrolled'],['epn.video_percent'],['ep.menu_category_1'],['ep.menu_category_2'],['ep.menu_category_3'],['ep.menu_category_4'],['ep.menu_category_5'],['en (1)'],['epn.value (1)'],['epn.percent_scrolled (1)'],['en (2)'],['epn.value (2)'],['epn.percent_scrolled (2)'],['en (3)'],['epn.value (3)'],['epn.percent_scrolled (3)'],['en (4)'],['epn.value (4)'],['epn.percent_scrolled (4)']]       
 },
 /** 
  * Space dictionary 

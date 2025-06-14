@@ -1,7 +1,7 @@
 /******************************************************************************
  * @title Tags Controller
  * @author DENIS ROUSSEAU
- * @version 4.6
+ * @version 9.0
  ******************************************************************************/
 /*jslint strict: false, plusplus: true, regexp: true, evil: true, continue: true, trailing: false, white: true*/
 /**
@@ -9,7 +9,7 @@
  */
 var tc=
 {
-    state : {checks:{}, bar:true, raise:true},
+    state : {checks:{}, bar:true, raise:false},
     record : true,
     timeout : 0,
     timer : null,    
@@ -1589,20 +1589,47 @@ var tc=
             {
                 tc.rqdone[rq.requestId].done=true;
                 console.log(tps.name+" >> "+rq.url+" has returned: "+reason);
-                tm.wx.runtime.sendMessage({type:'bm_newtag'});
-                tm.wx.runtime.sendMessage({type:'bm_focus'});
-                try
-                {
-                    navigator.clipboard.writeText(reason+'\t'+rq.url+'\r\n');
-                    tc.showMsgBar((reason && reason.indexOf("net::ERR_BLOCKED_BY_CLIENT")==0)? trs.blockedRequest : trs.badRequest, null, false, 4500);
-                }
-                catch (error)
-                {
-                    console.log("... couldn't be written into the clipboard ("+error+")");
-                }
+                const msg = reason+'\t'+rq.url+'\r\n'
+                tm.wx.runtime.sendMessage({type:'bm_newtag', error:msg});
              }
         }          
-    },    
+    },
+    onErrorDisplay : function(msg)
+    {  
+        const errorClient = 'net::ERR_BLOCKED_BY_CLIENT';
+        const isErrorClient = (msg && msg.indexOf(errorClient) >= 0) ;
+        if (isErrorClient)
+        {
+            navigator.clipboard.readText()
+            .then((text) => 
+            {
+                if (text.indexOf(errorClient) >= 0)
+                {
+                    msg = text + '\r\n' + msg;
+                }
+                tc.ErrorDisplay(trs.blockedRequest, msg);
+            })
+            .catch(() => 
+            {
+                tc.ErrorDisplay(trs.blockedRequest, msg);
+            });
+        }  
+        else
+        {
+            tc.ErrorDisplay(trs.badRequest, msg);
+        }     
+    },  
+    ErrorDisplay : function(error, details)
+    {
+        if (details)
+        {
+            navigator.clipboard.writeText(details);
+        }
+        if (error)
+        {
+            tc.showMsgBar(error, null, false, 5000);
+        }
+    }, 
     onKeyDown : function(e)
     {
         if (tc.view || tc.chart)
@@ -1678,7 +1705,13 @@ tm.wx.runtime.onMessage.addListener(function(request, sender, sendResponse)
         {
             tc.showMsgBar(request.text, null, request.nohide);
         }
-        break;     
+        break;  
+    case 'tc_errorDisplay':
+        if (request.text)
+        {
+            tc.onErrorDisplay(request.text);
+        }
+        break;   
     }
 });
 

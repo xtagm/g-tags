@@ -1,7 +1,7 @@
 /**
  * @title Tags tracker - Background
  * @author DENIS ROUSSEAU
- * @version 4.0
+ * @version 9.0
  ******************************************************************************/
 /*jslint nomen: true, plusplus: true, regexp: true*/
 /**
@@ -222,7 +222,8 @@ var bm=
     },
     onSizeChanged : function()
     {
-        if (bm.winid)
+        bm.getWinId() ;
+        if (bm.winid != null)
         {
             wx.windows.get(bm.winid, null, function(w)
             { 
@@ -239,14 +240,16 @@ var bm=
     },
     startHighligth :function()
     {
-        if (bm.winid && !bm.timeoutID)
+        bm.getWinId() ;
+        if (bm.winid != null && !bm.timeoutID)
         {
             wx.windows.update(bm.winid, {"drawAttention":true});
         }        
     },
     stopHighlight : function()
     {
-        if (bm.winid)
+        bm.getWinId() ;
+        if (bm.winid != null)
         {
             bm.timeoutID=null;
             wx.windows.update(bm.winid, {"drawAttention":false});
@@ -254,7 +257,7 @@ var bm=
     },
     createWindow : function(item)
     {
-        chrome.windows.getCurrent({ populate: false }, (window) => {
+        wx.windows.getCurrent({ populate: false }, (window) => {
             bm.currentWindow.width = window.width;
             bm.currentWindow.height = window.height;
         });
@@ -263,6 +266,7 @@ var bm=
         function(w)
         {
             bm.winid=w.id;
+            bm.persist.set({'window':{id:w.id}}) ;
         });
     },
     activate:function(tab)
@@ -275,7 +279,19 @@ var bm=
         "32": "../img/32.png",
         "38": "../img/38.png"     
         }});
-        bm.loaded = false;        
+        bm.loaded = null;        
+    },
+    getWinId:function()
+    {
+        if (bm.winid == null)
+        {
+            bm.persist.get('window', (item) => {
+                if (item.window && item.window.id)
+                {
+                    bm.winid = item.window.id;
+                }             
+            });
+        }
     }
 };
 /*****************************************************************
@@ -286,17 +302,25 @@ var bm=
 */
 wx.action.onClicked.addListener(function(tab) 
 {     
-    wx.windows.getCurrent(function(win) 
+    bm.getWinId() ;
+    if (bm.winid != null) 
     {
-        if (bm.winid) 
+        chrome.windows.get(bm.winid, { populate: false }, (win) => 
         {
-            wx.windows.update(bm.winid, {"focused":true}); 
-        }
-        else
-        {       
-            bm.activate(tab);
-        }
-    });
+            if (chrome.runtime.lastError || !win)
+            {
+                bm.winid = null ;
+            } 
+            else 
+            {
+                wx.windows.update(bm.winid, {"focused":true}); 
+            }
+        });         
+    }
+    if (bm.winid == null)
+    {       
+        bm.activate(tab);
+    }
 });
 
 /*****************************************************************
@@ -350,9 +374,13 @@ wx.runtime.onMessage.addListener(function(message, sender, sendResponse)
             break;
         case 'bm_newtag':
             bm.startHighligth();
-            break;
+            if (message.error == undefined)
+            {
+                break;
+            }
         case 'bm_focus':
-            if (bm.winid)
+            bm.getWinId() ;
+            if (bm.winid != null)
             {
                 wx.windows.update(bm.winid, {"focused":true}); 
             }
@@ -398,6 +426,10 @@ wx.runtime.onMessage.addListener(function(message, sender, sendResponse)
             });
             break;
         }
+        if (message.error)
+        {
+            wx.runtime.sendMessage({type: 'tc_errorDisplay', text: message.error});            
+        }
     }
 });
 
@@ -410,30 +442,43 @@ wx.runtime.onMessage.addListener(function(message, sender, sendResponse)
  */
 wx.windows.onRemoved.addListener(function(windowId)
 {
-    if (windowId === bm.winid) 
+    bm.getWinId();
+    if (windowId !== bm.winid && bm.winid != null) 
     {
-        bm.disableView() ;
-        bm.tabid = null;
-        bm.winid = null;                
-        wx.action.setIcon(
-        {
-            path: 
+        wx.windows.remove(bm.winid, () => {
+            if (wx.runtime.lastError) 
             {
-            "16": "../img/16bw.png",
-            "19": "../img/19bw.png",       
-            "32": "../img/32bw.png",
-            "38": "../img/38bw.png"    
-            } 
-        }
-        );
-    }  
+                console.error("Error attempting to close XTags:", chrome.runtime.lastError);
+            }
+            else 
+            {
+                console.log("XTag closed!");
+            }
+        });    
+    }
+    bm.disableView() ;
+    bm.tabid = null;
+    bm.winid = null;
+    bm.persist.remove('window');                
+    wx.action.setIcon(
+    {
+        path: 
+        {
+        "16": "../img/16bw.png",
+        "19": "../img/19bw.png",       
+        "32": "../img/32bw.png",
+        "38": "../img/38bw.png"    
+        } 
+    }
+    );
 });
 /**
  * Focus listener
  */
 wx.windows.onFocusChanged.addListener(function(windowId)
 {
-   if (bm.winid && bm.winid!==windowId)
+   bm.getWinId() ;
+   if (bm.winid != null && bm.winid!==windowId)
    {
         bm.onSizeChanged();   
         if (windowId && windowId!==-1)
@@ -460,7 +505,8 @@ wx.windows.onFocusChanged.addListener(function(windowId)
  */
 wx.tabs.onActivated.addListener(function(activeInfo) 
 {
-    if (bm.tabid!==activeInfo.tabId && bm.winid && bm.winid!==activeInfo.windowId)
+    bm.getWinId() ;
+    if (bm.tabid!==activeInfo.tabId && bm.winid != null && bm.winid!==activeInfo.windowId)
     {
         bm.onTabChanged(activeInfo.tabId);
     }   
@@ -495,4 +541,4 @@ wx.tabs.onUpdated.addListener(function(tabid, changeInfo, tab)
        }
     }
 });
-
+    
